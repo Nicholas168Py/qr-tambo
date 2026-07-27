@@ -5,15 +5,17 @@
  * Creates database, tables, and default admin user
  */
 
+require_once __DIR__ . '/config/config.php';
+
 $results = [];
 $success = true;
 
 try {
     // Connect to the existing database
     $pdo = new PDO(
-        "mysql:host=sql301.infinityfree.com;dbname=if0_42506388_qr_tambo;charset=utf8mb4",
-        'if0_42506388',
-        'B0T3u5l7sC',
+        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+        DB_USER,
+        DB_PASS,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
     $results[] = ['step' => 'Conexión a MySQL', 'status' => 'OK', 'ok' => true];

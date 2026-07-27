@@ -1,23 +1,21 @@
 <?php
 /**
  * QR Tambo - Database Connection
- * Singleton PDO connection for XAMPP MySQL
+ * Singleton PDO connection
  */
+
+require_once __DIR__ . '/config.php';
+
 class Database {
     private static $instance = null;
     private $connection;
 
-    private $host = 'sql301.infinityfree.com';
-    private $dbname = 'if0_42506388_qr_tambo';
-    private $username = 'if0_42506388';
-    private $password = 'B0T3u5l7sC';
-
     private function __construct() {
         try {
             $this->connection = new PDO(
-                "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4",
-                $this->username,
-                $this->password,
+                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
+                DB_USER,
+                DB_PASS,
                 [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                     PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,

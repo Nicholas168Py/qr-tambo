@@ -1,0 +1,12 @@
+# Credenciales de base de datos
+config/config.php
+
+# Sistema operativo
+Thumbs.db
+.DS_Store
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
