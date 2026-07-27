@@ -7,10 +7,10 @@ class Database {
     private static $instance = null;
     private $connection;
 
-    private $host = 'localhost';
-    private $dbname = 'qr_tambo';
-    private $username = 'root';
-    private $password = '';
+    private $host = 'sql301.infinityfree.com';
+    private $dbname = 'if0_42506388_qr_tambo';
+    private $username = 'if0_42506388';
+    private $password = 'B0T3u5l7sC';
 
     private function __construct() {
         try {

@@ -9,11 +9,11 @@ $results = [];
 $success = true;
 
 try {
-    // Connect without database
+    // Connect to the existing database
     $pdo = new PDO(
-        "mysql:host=localhost;charset=utf8mb4",
-        'root',
-        '',
+        "mysql:host=sql301.infinityfree.com;dbname=if0_42506388_qr_tambo;charset=utf8mb4",
+        'if0_42506388',
+        'B0T3u5l7sC',
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
     $results[] = ['step' => 'Conexión a MySQL', 'status' => 'OK', 'ok' => true];
@@ -26,32 +26,27 @@ try {
     $schema = file_get_contents($schemaPath);
     $results[] = ['step' => 'Lectura de schema.sql', 'status' => 'OK', 'ok' => true];
 
-    // Execute schema statements
+    // Execute only CREATE TABLE statements
     $statements = array_filter(
         array_map('trim', explode(';', $schema)),
-        function($s) { return !empty($s) && $s !== "\n"; }
+        function($s) { return !empty($s) && stripos($s, 'CREATE TABLE') === 0; }
     );
 
     foreach ($statements as $stmt) {
         if (empty(trim($stmt))) continue;
         try {
-            $pdo->exec($stmt);
-            // Extract a short description
-            preg_match('/(?:CREATE|USE|INSERT|ALTER)\s+(?:DATABASE|TABLE|INTO)?\s*(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i', $stmt, $m);
-            $desc = isset($m[0]) ? substr($m[0], 0, 60) : substr($stmt, 0, 40);
-            $results[] = ['step' => "SQL: $desc", 'status' => 'OK', 'ok' => true];
+            $pdo->exec($stmt . ';');
+            preg_match('/(?:CREATE TABLE)\s*(?:IF\s+NOT\s+EXISTS\s+)?`?(\w+)`?/i', $stmt, $m);
+            $desc = isset($m[0]) ? $m[0] : substr($stmt, 0, 40);
+            $results[] = ['step' => "Tabla: " . ($m[1] ?? '?'), 'status' => 'Creada', 'ok' => true];
         } catch (PDOException $e) {
-            // Ignore "database already exists" and similar non-critical errors
-            if ($e->getCode() != '42S01' && $e->getCode() != '00000') {
-                $results[] = ['step' => "SQL: " . substr($stmt, 0, 40), 'status' => $e->getMessage(), 'ok' => false];
+            if ($e->getCode() == '42S01') {
+                $results[] = ['step' => "Tabla: " . ($m[1] ?? '?'), 'status' => 'Ya existía', 'ok' => true];
             } else {
-                $results[] = ['step' => "SQL: " . substr($stmt, 0, 40), 'status' => 'Ya existía (OK)', 'ok' => true];
+                throw $e;
             }
         }
     }
-
-    // Switch to qr_tambo database
-    $pdo->exec("USE qr_tambo");
 
     // Create default admin user
     $adminPassword = password_hash('admin123', PASSWORD_DEFAULT);

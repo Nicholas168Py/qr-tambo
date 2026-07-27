@@ -3,8 +3,6 @@
 -- Clases de Baile
 -- ============================================
 
-CREATE DATABASE IF NOT EXISTS qr_tambo CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE qr_tambo;
 
 -- ============================================
 -- Tabla: usuarios
