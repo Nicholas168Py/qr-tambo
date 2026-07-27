@@ -26,6 +26,9 @@ class Database {
             );
         } catch (PDOException $e) {
             http_response_code(500);
+            if (!headers_sent()) {
+                header('Content-Type: application/json; charset=utf-8');
+            }
             die(json_encode([
                 'success' => false,
                 'message' => 'Error de conexión a la base de datos: ' . $e->getMessage()

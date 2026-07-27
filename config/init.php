@@ -4,6 +4,14 @@
  * Session management, headers, and helper functions
  */
 
+error_reporting(0);
+
+// Set JSON header early for API calls
+$isApi = isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/api/') !== false;
+if ($isApi) {
+    header('Content-Type: application/json; charset=utf-8');
+}
+
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -125,7 +133,5 @@ function getMonthName($monthNumber) {
     return isset($months[$monthNumber]) ? $months[$monthNumber] : 'Desconocido';
 }
 
-// Set JSON header for API calls
-if (strpos($_SERVER['REQUEST_URI'], '/api/') !== false) {
-    header('Content-Type: application/json; charset=utf-8');
-}
+// Remove duplicate JSON header line at end
+

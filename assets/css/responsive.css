@@ -1,0 +1,569 @@
+/* ============================================
+   QR TAMBO - Responsive / Mobile Overrides
+   Cargado después de style.css
+   ============================================ */
+
+/* === Small tablets and below === */
+@media (max-width: 768px) {
+    /* Layout */
+    .main-content {
+        padding: 16px 10px;
+        padding-top: 60px;
+    }
+
+    .main-header {
+        margin-bottom: 20px;
+    }
+
+    .main-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .glass-card {
+        padding: 16px;
+        border-radius: var(--radius-md);
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 80vw;
+        padding: 16px 0;
+    }
+
+    .hamburger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 12px;
+        left: 12px;
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        z-index: 200;
+    }
+
+    /* Stats */
+    .stats-grid {
+        gap: 12px;
+    }
+
+    .stat-card {
+        padding: 16px 12px;
+    }
+
+    .stat-card .stat-icon {
+        font-size: 1.5rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.6rem;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.78rem;
+    }
+
+    /* Schedule Grid */
+    .schedule-grid-wrapper {
+        margin: 0 -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .schedule-grid {
+        min-width: 580px;
+    }
+
+    .schedule-grid th {
+        padding: 6px 3px;
+        font-size: 0.68rem;
+        letter-spacing: 0;
+    }
+
+    .schedule-grid th:first-child {
+        min-width: 52px;
+        font-size: 0.65rem;
+    }
+
+    .schedule-grid td {
+        padding: 5px 2px;
+    }
+
+    .schedule-grid td.slot-class {
+        padding: 6px 4px;
+        gap: 3px;
+    }
+
+    .schedule-grid td.slot-class .class-name {
+        font-size: 0.7rem;
+    }
+
+    .schedule-grid td .btn-sm-ghost {
+        padding: 6px 8px;
+        font-size: 0.85rem;
+    }
+
+    .schedule-grid td.slot-empty {
+        font-size: 0.65rem;
+    }
+
+    /* Forms */
+    .add-form {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .add-form .form-group {
+        min-width: 100%;
+    }
+
+    .form-input {
+        padding: 12px 14px;
+        font-size: 0.88rem;
+    }
+
+    .btn {
+        padding: 12px 18px;
+        font-size: 0.85rem;
+    }
+
+    /* Filter bar */
+    .filter-bar {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .filter-bar .form-group {
+        min-width: 100%;
+    }
+
+    /* Tables */
+    .table-container {
+        margin: 0 -10px;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    table {
+        font-size: 0.82rem;
+    }
+
+    thead th,
+    tbody td {
+        padding: 8px 10px;
+    }
+
+    /* Auth pages */
+    .auth-card {
+        padding: 24px 20px;
+    }
+
+    .auth-card .logo h1 {
+        font-size: 1.8rem;
+    }
+
+    .auth-card .logo-icon {
+        font-size: 2.8rem;
+    }
+
+    /* QR page */
+    .qr-card {
+        padding: 20px 12px;
+    }
+
+    .qr-container {
+        padding: 10px;
+    }
+
+    .qr-container canvas {
+        width: 180px !important;
+        height: 180px !important;
+    }
+
+    .qr-class-name {
+        font-size: 1.3rem;
+    }
+
+    .qr-date {
+        font-size: 1rem;
+    }
+
+    .day-pill {
+        padding: 10px 16px;
+        font-size: 0.82rem;
+    }
+
+    .day-selector {
+        gap: 6px;
+        padding-bottom: 6px;
+    }
+
+    /* Bailarin */
+    .bailarin-main {
+        padding: 16px 12px;
+    }
+
+    .bailarin-header {
+        padding: 12px 16px;
+        gap: 6px;
+    }
+
+    .bailarin-header h2 {
+        font-size: 1rem;
+    }
+
+    .scan-card {
+        padding: 32px 16px;
+    }
+
+    .scan-card .scan-icon {
+        font-size: 3rem;
+    }
+
+    .scan-card h2 {
+        font-size: 1.2rem;
+    }
+
+    .history-item {
+        padding: 12px 14px;
+    }
+
+    /* Modal */
+    .modal-content {
+        padding: 20px 16px;
+        margin: 12px;
+    }
+
+    /* Toast */
+    #toast-container {
+        top: auto;
+        bottom: 20px;
+        right: 12px;
+        left: 12px;
+    }
+
+    .toast {
+        max-width: 100%;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+}
+
+/* === Mobile phones === */
+@media (max-width: 480px) {
+    .main-content {
+        padding: 12px 8px;
+        padding-top: 56px;
+    }
+
+    .glass-card {
+        padding: 14px;
+        border-radius: 10px;
+    }
+
+    .main-header h1 {
+        font-size: 1.15rem;
+    }
+
+    .main-header p {
+        font-size: 0.82rem;
+    }
+
+    /* Stats */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .stat-card {
+        padding: 12px 8px;
+    }
+
+    .stat-card .stat-icon {
+        font-size: 1.3rem;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.4rem;
+    }
+
+    .stat-card .stat-label {
+        font-size: 0.72rem;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 10px 16px;
+        font-size: 0.82rem;
+    }
+
+    .btn-sm {
+        padding: 8px 12px;
+        font-size: 0.78rem;
+    }
+
+    /* Schedule grid - make it more compact for small screens */
+    .schedule-grid {
+        min-width: 500px;
+    }
+
+    .schedule-grid th {
+        padding: 4px 2px;
+        font-size: 0.62rem;
+    }
+
+    .schedule-grid th:first-child {
+        min-width: 44px;
+        font-size: 0.6rem;
+    }
+
+    .schedule-grid td {
+        padding: 4px 2px;
+    }
+
+    .schedule-grid td.slot-class {
+        padding: 4px 3px;
+        gap: 2px;
+    }
+
+    .schedule-grid td.slot-class .class-name {
+        font-size: 0.63rem;
+    }
+
+    .schedule-grid td .btn-sm-ghost {
+        padding: 5px 6px;
+        font-size: 0.75rem;
+    }
+
+    /* QR */
+    .qr-class-name {
+        font-size: 1.1rem;
+    }
+
+    .qr-class-time {
+        font-size: 0.92rem;
+    }
+
+    .qr-container canvas {
+        width: 160px !important;
+        height: 160px !important;
+    }
+
+    .qr-card {
+        padding: 16px 10px;
+    }
+
+    .day-pill {
+        padding: 8px 12px;
+        font-size: 0.78rem;
+    }
+
+    /* Forms */
+    .form-input {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+
+    .form-input-icon .form-input {
+        padding-left: 38px;
+    }
+
+    .form-input-icon .icon {
+        font-size: 0.95rem;
+        left: 11px;
+    }
+
+    /* Tables */
+    thead th,
+    tbody td {
+        padding: 6px 8px;
+        font-size: 0.78rem;
+    }
+
+    /* Auth */
+    .auth-card {
+        padding: 20px 16px;
+    }
+
+    .auth-card .logo h1 {
+        font-size: 1.6rem;
+    }
+
+    .auth-card .logo p {
+        font-size: 0.82rem;
+    }
+
+    .auth-card .logo-icon {
+        font-size: 2.4rem;
+    }
+
+    /* Bailarin */
+    .bailarin-main {
+        padding: 12px 8px;
+    }
+
+    .scan-card {
+        padding: 24px 12px;
+    }
+
+    .scan-card .scan-icon {
+        font-size: 2.5rem;
+    }
+
+    .scan-card h2 {
+        font-size: 1.1rem;
+    }
+
+    .history-item {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+    }
+
+    .history-item .history-date {
+        font-size: 0.78rem;
+    }
+
+    .history-section h3 {
+        font-size: 1rem;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 85vw;
+        padding: 12px 0;
+    }
+
+    .sidebar-logo {
+        padding: 0 16px 16px;
+    }
+
+    .sidebar-logo h2 {
+        font-size: 1.1rem;
+    }
+
+    .nav-link {
+        padding: 10px 14px;
+        font-size: 0.88rem;
+    }
+
+    .nav-link .nav-icon {
+        font-size: 1rem;
+        width: 20px;
+    }
+
+    /* Cards grid */
+    .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .item-card {
+        padding: 14px;
+    }
+
+    .item-card h3 {
+        font-size: 1rem;
+    }
+
+    .item-card p {
+        font-size: 0.82rem;
+    }
+
+    .card-actions .btn-sm {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+
+    /* Empty states */
+    .empty-state {
+        padding: 40px 16px;
+    }
+
+    .empty-state .empty-icon {
+        font-size: 2.5rem;
+    }
+
+    /* Scanner */
+    #scanner-container {
+        margin: 0 -8px;
+        border-radius: 8px;
+    }
+
+    #scanner-container video {
+        width: 100% !important;
+    }
+
+    .scan-result {
+        padding: 24px 12px;
+    }
+
+    .scan-result .result-icon {
+        font-size: 3.5rem;
+    }
+
+    .scan-result h2 {
+        font-size: 1.2rem;
+    }
+
+    .schedule-grid td .btn-sm-ghost {
+        padding: 8px 10px;
+        font-size: 0.85rem;
+    }
+
+    .schedule-grid td.slot-class {
+        padding: 8px 6px;
+    }
+}
+
+/* === Very small phones === */
+@media (max-width: 360px) {
+    .main-content {
+        padding: 8px 6px;
+        padding-top: 52px;
+    }
+
+    .schedule-grid {
+        min-width: 420px;
+    }
+
+    .schedule-grid th {
+        font-size: 0.55rem;
+        padding: 3px 1px;
+    }
+
+    .schedule-grid th:first-child {
+        min-width: 38px;
+        font-size: 0.55rem;
+    }
+
+    .schedule-grid td.slot-class .class-name {
+        font-size: 0.6rem;
+    }
+
+    .schedule-grid td .btn-sm-ghost {
+        padding: 6px 5px;
+        font-size: 0.7rem;
+    }
+
+    .qr-container canvas {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .day-pill {
+        padding: 6px 10px;
+        font-size: 0.72rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-card .stat-value {
+        font-size: 1.3rem;
+    }
+}
