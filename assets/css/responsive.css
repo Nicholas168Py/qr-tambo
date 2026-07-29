@@ -92,7 +92,6 @@
 
     .schedule-grid td.slot-class {
         padding: 6px 4px;
-        gap: 3px;
     }
 
     .schedule-grid td.slot-class .class-name {
@@ -214,6 +213,17 @@
         font-size: 1rem;
     }
 
+    .bailarin-header-actions {
+        gap: 8px !important;
+    }
+
+    .bailarin-header-actions span:first-child {
+        max-width: 120px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
     .scan-card {
         padding: 32px 16px;
     }
@@ -325,7 +335,6 @@
 
     .schedule-grid td.slot-class {
         padding: 4px 3px;
-        gap: 2px;
     }
 
     .schedule-grid td.slot-class .class-name {

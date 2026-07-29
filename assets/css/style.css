@@ -840,7 +840,6 @@ tbody tr:last-child td {
     display: block;
     font-size: 0.82rem;
     line-height: 1.2;
-    flex: 1;
     text-align: center;
 }
 
@@ -861,7 +860,6 @@ tbody tr:last-child td {
     cursor: pointer;
     transition: transform 0.15s;
     line-height: 1;
-    flex-shrink: 0;
 }
 
 .schedule-grid td.slot-class .btn-sm-ghost:hover {
@@ -1097,6 +1095,7 @@ tbody tr:last-child td {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 .bailarin-header {
@@ -1107,6 +1106,7 @@ tbody tr:last-child td {
     background: rgba(10, 10, 26, 0.8);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--glass-border);
+    overflow: hidden;
 }
 
 .bailarin-header h2 {
@@ -1115,10 +1115,24 @@ tbody tr:last-child td {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    white-space: nowrap;
+}
+
+.bailarin-header-actions {
+    overflow: hidden;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.bailarin-header-actions span:first-child {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .bailarin-main {
-    flex: 1;
     padding: 24px;
     max-width: 500px;
     margin: 0 auto;

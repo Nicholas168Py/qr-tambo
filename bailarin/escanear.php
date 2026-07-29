@@ -11,8 +11,8 @@ include '../includes/header.php';
 <div class="bailarin-layout">
     <header class="bailarin-header">
         <h2><i class="fas fa-music"></i> QR Tambo</h2>
-        <div style="display:flex;align-items:center;gap:12px;">
-            <span style="font-size:0.85rem;color:var(--text-secondary)"><?= htmlspecialchars($_SESSION['nombre']) ?></span>
+        <div class="bailarin-header-actions" style="display:flex;align-items:center;gap:12px;">
+            <span><?= htmlspecialchars($_SESSION['nombre']) ?></span>
             <span class="badge badge-bailarin">Bailarín</span>
             <button class="btn btn-secondary btn-sm" onclick="window.location.href='dashboard.php'"><i class="fas fa-arrow-left"></i> Volver</button>
         </div>
