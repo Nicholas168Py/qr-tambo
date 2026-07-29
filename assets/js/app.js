@@ -6,6 +6,8 @@
 // API Helper
 // ============================================
 async function api(endpoint, method = 'GET', data = null) {
+    const logData = data ? JSON.stringify(data).substring(0, 200) : '';
+    console.log(`[API] -> ${method} ${endpoint}`, logData);
     const options = {
         method: method,
         headers: {
@@ -19,11 +21,24 @@ async function api(endpoint, method = 'GET', data = null) {
 
     try {
         const response = await fetch(endpoint, options);
-        const result = await response.json();
+        console.log(`[API] <- ${response.status} ${endpoint}`);
+        const text = await response.text();
+        if (!text) {
+            console.error(`[API] Respuesta vacía de ${endpoint}`);
+            return { success: false, message: 'Respuesta vacía del servidor', code: response.status };
+        }
+        let result;
+        try {
+            result = JSON.parse(text);
+        } catch (e) {
+            console.error(`[API] JSON inválido desde ${endpoint}:`, text.substring(0, 500));
+            return { success: false, message: 'Error del servidor', code: response.status, raw: text.substring(0, 200) };
+        }
+        console.log(`[API] OK ${endpoint}`, JSON.stringify(result).substring(0, 300));
         return result;
     } catch (error) {
-        console.error('API Error:', error);
-        return { success: false, message: 'Error de conexión con el servidor' };
+        console.error(`[API] FETCH ERROR ${method} ${endpoint}:`, error.message || error);
+        return { success: false, message: 'Error de conexión con el servidor: ' + (error.message || '') };
     }
 }
 
@@ -155,9 +170,7 @@ async function logout() {
 // Generate UUID-like token
 // ============================================
 function generateToken() {
-    return 'xxxx-xxxx-xxxx'.replace(/x/g, () => {
-        return Math.floor(Math.random() * 16).toString(16);
-    }) + '-' + Date.now().toString(36);
+    return Date.now().toString(36) + '-' + Math.random().toString(36).substr(2, 6);
 }
 
 // ============================================
@@ -179,3 +192,51 @@ document.addEventListener('click', (e) => {
         e.target.classList.remove('active');
     }
 });
+
+// ============================================
+// Debug Console visible en pantalla
+// ============================================
+(function() {
+    const panel = document.getElementById('debug-panel');
+    const logs = document.getElementById('debug-logs');
+    if (!panel || !logs) return;
+
+    const originalLog = console.log;
+    const originalWarn = console.warn;
+    const originalError = console.error;
+
+    function addLog(level, args) {
+        const text = Array.from(args).map(a => typeof a === 'string' ? a : JSON.stringify(a)).join(' ');
+        const time = new Date().toLocaleTimeString();
+        const prefix = level === 'error' ? '🔴' : level === 'warn' ? '🟡' : '⚪';
+        const line = document.createElement('div');
+        line.textContent = `${time} ${prefix} ${text}`;
+        line.style.color = level === 'error' ? '#f66' : level === 'warn' ? '#fc0' : '#0f0';
+        logs.appendChild(line);
+        panel.scrollTop = panel.scrollHeight;
+
+        // Auto-mostrar en errores
+        if (level === 'error') {
+            panel.style.display = 'block';
+        }
+    }
+
+    console.log = function() { originalLog.apply(console, arguments); addLog('log', arguments); };
+    console.warn = function() { originalWarn.apply(console, arguments); addLog('warn', arguments); };
+    console.error = function() { originalError.apply(console, arguments); addLog('error', arguments); };
+
+    // Tocar 5 veces rápido muestra el panel
+    let tapCount = 0;
+    let tapTimer = null;
+    document.addEventListener('click', () => {
+        tapCount++;
+        if (tapTimer) clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => { tapCount = 0; }, 1000);
+        if (tapCount >= 5) {
+            tapCount = 0;
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+
+    console.log('[DEBUG] Panel de depuración listo — tocá 5 veces para mostrar');
+})();

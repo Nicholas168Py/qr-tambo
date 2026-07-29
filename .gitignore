@@ -1,6 +1,9 @@
 # Credenciales de base de datos
 config/config.php
 
+# Sesiones de PHP
+sessions/
+
 # Sistema operativo
 Thumbs.db
 .DS_Store

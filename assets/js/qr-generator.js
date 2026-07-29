@@ -13,7 +13,10 @@ function getApiBase() {
 }
 
 async function loadDayClasses(dayNum) {
-    const result = await api(getApiBase() + `api/qr/get_clases_dia.php?dia=${dayNum}`, 'GET');
+    console.log(`[QR] Cargando clases para día ${dayNum}...`);
+    const endpoint = getApiBase() + `api/qr/get_clases_dia.php?dia=${dayNum}`;
+    const result = await api(endpoint, 'GET');
+    console.log(`[QR] Clases cargadas:`, result);
     if (result.success) {
         dayClasses = result.data;
         currentDayData = {
@@ -23,19 +26,21 @@ async function loadDayClasses(dayNum) {
             total: result.total
         };
         currentClassIndex = 0;
+        console.log(`[QR] ${dayClasses.length} clases encontradas para ${result.dia_nombre}`);
         return true;
     }
+    console.error(`[QR] Error al cargar clases:`, result.message);
     return false;
 }
 
 function generateQRContent(clase, fecha, horaInicio) {
     const token = generateToken();
     const data = {
-        clase: clase.nombre,
-        fecha: fecha,
-        hora: horaInicio,
-        token: token,
-        horario_id: clase.id
+        c: clase.clase_nombre,
+        f: fecha,
+        h: horaInicio,
+        t: token,
+        i: clase.id
     };
     return { raw: data, encoded: btoa(JSON.stringify(data)) };
 }
@@ -48,6 +53,7 @@ function getQrSize() {
 }
 
 function renderQR() {
+    console.log(`[QR] Render QR clase ${currentClassIndex + 1} de ${dayClasses.length}`);
     if (dayClasses.length === 0) {
         document.getElementById('qrDisplay').innerHTML = `
             <div class="qr-empty">
@@ -64,6 +70,7 @@ function renderQR() {
     const percent = Math.round((current / total) * 100);
 
     const url = `${window.location.origin}${window.location.pathname.replace('admin/qr_dia.php', 'registro_qr.php')}?token=${encodeURIComponent(encoded)}`;
+    console.log(`[QR] URL: ${url.substring(0, 120)}`);
 
     document.getElementById('qrDisplay').innerHTML = `
         <div class="qr-date">${currentDayData.dia_nombre}, ${formatDate(currentDayData.fecha)}</div>
@@ -99,13 +106,14 @@ function renderQR() {
         height: qrSize,
         colorDark: '#1a0a2e',
         colorLight: '#ffffff',
-        correctLevel: QRCode.CorrectLevel.H
+        correctLevel: QRCode.CorrectLevel.L
     });
 
     updateStatusBar();
 }
 
 function nextClass() {
+    console.log(`[QR] Siguiente clase: ${currentClassIndex + 2} de ${dayClasses.length}`);
     if (currentClassIndex < dayClasses.length - 1) {
         currentClassIndex++;
         renderQR();
@@ -113,6 +121,7 @@ function nextClass() {
 }
 
 function finishDay() {
+    console.log('[QR] Día finalizado');
     const btn = document.getElementById('nextBtn');
     btn.disabled = true;
     btn.textContent = '<i class="fas fa-check-circle"></i> Día Completado';
@@ -141,7 +150,9 @@ function updateStatusBar() {
 }
 
 async function initPage() {
+    console.log('[QR] initPage()');
     const dayNum = getCurrentDayNumber();
+    console.log(`[QR] Día actual: ${dayNum} (${getDayName(dayNum)})`);
     const success = await loadDayClasses(dayNum);
     if (success && dayClasses.length > 0) {
         currentClassIndex = 0;

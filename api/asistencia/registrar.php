@@ -18,14 +18,26 @@ if (empty($token)) {
 }
 
 // Decode the QR token
-$decoded = json_decode(base64_decode($token), true);
+$decodedRaw = base64_decode($token, true);
+$decoded = $decodedRaw ? json_decode($decodedRaw, true) : null;
 
-if (!$decoded || !isset($decoded['clase']) || !isset($decoded['fecha'])) {
-    jsonResponse(['success' => false, 'message' => 'Código QR inválido'], 400);
+$debugInfo = '';
+if ($decodedRaw === false) {
+    $debugInfo = ' (base64 inválido: ' . substr($token, 0, 30) . '...)';
+} elseif ($decoded === null) {
+    $debugInfo = ' (JSON inválido: ' . substr($decodedRaw, 0, 50) . '...)';
+} elseif (!isset($decoded['c'])) {
+    $debugInfo = ' (falta campo "c". claves: ' . implode(',', array_keys($decoded)) . ')';
+} elseif (!isset($decoded['f'])) {
+    $debugInfo = ' (falta campo "f". claves: ' . implode(',', array_keys($decoded)) . ')';
 }
 
-$clase = $decoded['clase'];
-$fecha = $decoded['fecha'];
+if (!$decoded || !isset($decoded['c']) || !isset($decoded['f'])) {
+    jsonResponse(['success' => false, 'message' => 'Código QR inválido' . $debugInfo], 400);
+}
+
+$clase = $decoded['c'];
+$fecha = $decoded['f'];
 $user = getCurrentUser();
 
 // Validate date (allow today and yesterday for flexibility)

@@ -6,6 +6,15 @@
 
 error_reporting(0);
 
+// Ensure sessions work on InfinityFree (writable path)
+$sessDir = __DIR__ . '/../sessions';
+if (!is_dir($sessDir)) {
+    @mkdir($sessDir, 0777, true);
+}
+if (is_writable($sessDir)) {
+    session_save_path($sessDir);
+}
+
 // Set JSON header early for API calls
 $isApi = isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/api/') !== false;
 if ($isApi) {

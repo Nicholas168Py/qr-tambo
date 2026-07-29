@@ -1,7 +1,7 @@
 <?php
-session_start();
+require_once 'config/init.php';
 // Redirect if already logged in
-if (isset($_SESSION['user_id'])) {
+if (isLoggedIn()) {
     if ($_SESSION['rol'] === 'admin') {
         header('Location: admin/dashboard.php');
     } else {
@@ -57,6 +57,7 @@ include 'includes/header.php';
 </div>
 
 <script>
+console.log('[LOGIN] Página cargada');
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -65,16 +66,20 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     const btn = document.getElementById('loginBtn');
     
     if (!cedula || !password) {
+        console.warn('[LOGIN] Campos incompletos');
         showToast('Completa todos los campos', 'warning');
         return;
     }
 
+    console.log('[LOGIN] Enviando credenciales para:', cedula);
     btn.disabled = true;
     btn.textContent = 'Ingresando...';
     
     const result = await api('api/auth/login.php', 'POST', { cedula, password });
+    console.log('[LOGIN] Resultado:', JSON.stringify(result).substring(0, 300));
     
     if (result.success) {
+        console.log('[LOGIN] Login exitoso, redirigiendo a:', result.data.rol === 'admin' ? 'admin/dashboard.php' : 'bailarin/dashboard.php');
         showToast('¡Bienvenido, ' + result.data.nombre + '!', 'success');
         setTimeout(() => {
             if (result.data.rol === 'admin') {
@@ -84,6 +89,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
             }
         }, 800);
     } else {
+        console.warn('[LOGIN] Login falló:', result.message);
         showToast(result.message || 'Error al iniciar sesión', 'error');
         btn.disabled = false;
         btn.textContent = 'Iniciar Sesión';

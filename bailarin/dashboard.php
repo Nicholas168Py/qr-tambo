@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'bailarin') {
+require_once __DIR__ . '/../config/init.php';
+if (!isLoggedIn() || $_SESSION['rol'] !== 'bailarin') {
     header('Location: ../index.php');
     exit;
 }
@@ -36,16 +36,23 @@ include '../includes/header.php';
     </main>
 </div>
 
+<?php include '../includes/footer.php'; ?>
+
 <script>
+console.log('[BAILARIN] Dashboard cargado');
 async function loadHistory() {
+    console.log('[BAILARIN] Cargando historial...');
     const result = await api('../api/asistencia/list.php', 'GET');
     const container = document.getElementById('historyList');
+    console.log('[BAILARIN] Historial respuesta:', JSON.stringify(result).substring(0, 300));
 
     if (!result.success || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-clipboard-list"></i></span><p>Aún no tienes asistencias registradas</p><p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;">Escanea un QR en tu clase para registrar asistencia.</p></div>';
+        console.log('[BAILARIN] Sin historial');
+        container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-clipboard-list"></i></span><p>Aún no has asistido a clases</p><p style="font-size:0.85rem;color:var(--text-muted);margin-top:4px;">Escanea un QR en tu clase para registrar tu asistencia.</p></div>';
         return;
     }
 
+    console.log('[BAILARIN] Mostrando', result.data.length, 'registros');
     container.innerHTML = result.data.map(r => `
         <div class="glass-card history-item">
             <div>
@@ -58,5 +65,3 @@ async function loadHistory() {
 
 loadHistory();
 </script>
-
-<?php include '../includes/footer.php'; ?>

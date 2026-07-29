@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
+require_once __DIR__ . '/../config/init.php';
+if (!isLoggedIn() || $_SESSION['rol'] !== 'admin') {
     header('Location: ../index.php');
     exit;
 }
@@ -63,31 +63,38 @@ include '../includes/header.php';
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 <script src="../assets/js/qr-generator.js"></script>
+<?php include '../includes/footer.php'; ?>
+
 <script>
+console.log('[QR_ADMIN] Página QR del día cargada');
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('open');
 }
 
 function selectDayWithNav(day, btn) {
+    console.log('[QR_ADMIN] selectDayWithNav:', day);
     document.querySelectorAll('.sidebar-nav .nav-link').forEach(n => n.classList.remove('active'));
     if (btn) btn.classList.add('active');
     selectDay(day);
 }
 
 function selectDay(day) {
+    console.log('[QR_ADMIN] selectDay:', day);
     document.querySelectorAll('.day-pill').forEach(p => p.classList.remove('active'));
     document.querySelector(`.day-pill[data-day="${day}"]`)?.classList.add('active');
     loadAndRenderDay(day);
 }
 
 async function loadAndRenderDay(day) {
+    console.log('[QR_ADMIN] loadAndRenderDay:', day);
     document.getElementById('qrDisplay').innerHTML = `
         <div style="text-align:center;padding:80px 20px;">
             <div class="spinner" style="margin:20px auto;"></div>
             <p style="color:var(--text-secondary);margin-top:16px;">Cargando clases...</p>
         </div>`;
     const success = await loadDayClasses(day);
+    console.log('[QR_ADMIN] loadDayClasses result:', success, 'clases:', dayClasses.length);
     if (success && dayClasses.length > 0) {
         currentClassIndex = 0;
         renderQR();
@@ -112,10 +119,10 @@ function initDayPills() {
     container.innerHTML = days.map((d, i) =>
         `<button class="day-pill ${i + 1 === today ? 'active' : ''}" data-day="${i + 1}" onclick="selectDay(${i + 1})">${d}</button>`
     ).join('');
+    console.log('[QR_ADMIN] Day pills initialized, today:', today);
 }
 
 initDayPills();
+console.log('[QR_ADMIN] Cargando día actual...');
 loadAndRenderDay(getCurrentDayNumber());
 </script>
-
-<?php include '../includes/footer.php'; ?>

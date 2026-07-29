@@ -1,11 +1,11 @@
 <?php
-session_start();
+require_once 'config/init.php';
 $pageTitle = 'Registrar Asistencia';
 $basePath = '';
 include 'includes/header.php';
 
 $token = isset($_GET['token']) ? $_GET['token'] : '';
-$loggedIn = isset($_SESSION['user_id']);
+$loggedIn = isLoggedIn();
 ?>
 <div class="auth-page">
     <div class="bg-shapes">
@@ -50,38 +50,55 @@ $loggedIn = isset($_SESSION['user_id']);
 </div>
 
 <script>
+console.log('[REGISTRO] Página cargada, token:', <?= json_encode($token) ?>.substring(0, 50), 'loggedIn:', <?= $loggedIn ? 'true' : 'false' ?>);
 const QR_TOKEN = <?= json_encode($token) ?>;
 const IS_LOGGED_IN = <?= $loggedIn ? 'true' : 'false' ?>;
 
 async function registerAttendance() {
+    console.log('[REGISTRO] registerAttendance()');
     const card = document.getElementById('mainCard');
     card.innerHTML = `
         <div class="spinner" style="margin:20px auto;"></div>
         <h2 style="margin-top:16px;">Registrando asistencia...</h2>
         <p style="color:var(--text-secondary);margin-top:8px;">Por favor espera...</p>`;
 
-    const result = await api('api/asistencia/registrar.php', 'POST', { token: QR_TOKEN });
+    try {
+        const result = await api('api/asistencia/registrar.php', 'POST', { token: QR_TOKEN });
+        console.log('[REGISTRO] API response:', JSON.stringify(result).substring(0, 300));
 
-    if (result.success) {
+        if (result.success) {
+            card.innerHTML = `
+                <div style="padding:20px 0;">
+                    <div style="font-size:4rem;margin-bottom:16px;"><i class="fas fa-circle-check"></i></div>
+                    <h2>¡Asistencia Registrada!</h2>
+                    <div style="color:var(--text-secondary);margin:16px 0;">
+                        <p><strong>${result.data.nombre}</strong></p>
+                        <p>${result.data.clase}</p>
+                        <p>${formatDate(result.data.fecha)} <i class="fas fa-circle"></i> ${formatTime(result.data.hora_registro)}</p>
+                    </div>
+                    <a href="bailarin/dashboard.php" class="btn btn-primary">Ir a Mi Panel</a>
+                </div>`;
+        } else {
+            const isDuplicate = result.message && result.message.includes('Ya registraste');
+            console.warn('[REGISTRO] Error:', result.message, 'Código:', result.code);
+            card.innerHTML = `
+                <div style="padding:20px 0;">
+                    <div style="font-size:4rem;margin-bottom:16px;">${isDuplicate ? '<i class="fas fa-circle-info"></i>' : '<i class="fas fa-circle-xmark"></i>'}</div>
+                    <h2>${isDuplicate ? 'Ya Registrado' : 'Error'}</h2>
+                    <p style="color:var(--text-secondary);margin:12px 0;">${result.message || 'Error desconocido'}</p>
+                    ${result.code ? `<p style="font-size:0.75rem;color:var(--text-muted);">Código: ${result.code}</p>` : ''}
+                    ${result.raw ? `<p style="margin-top:8px;font-size:0.7rem;color:var(--text-muted);word-break:break-all;">${result.raw}</p>` : ''}
+                    <a href="bailarin/dashboard.php" class="btn btn-primary">Ir a Mi Panel</a>
+                </div>`;
+        }
+    } catch (e) {
+        console.error('[REGISTRO] Error:', e.message || e);
         card.innerHTML = `
             <div style="padding:20px 0;">
-                <div style="font-size:4rem;margin-bottom:16px;"><i class="fas fa-circle-check"></i></div>
-                <h2>¡Asistencia Registrada!</h2>
-                <div style="color:var(--text-secondary);margin:16px 0;">
-                    <p><strong>${result.data.nombre}</strong></p>
-                    <p>${result.data.clase}</p>
-                    <p>${formatDate(result.data.fecha)} <i class="fas fa-circle"></i> ${formatTime(result.data.hora_registro)}</p>
-                </div>
-                <a href="bailarin/dashboard.php" class="btn btn-primary">Ir a Mi Panel</a>
-            </div>`;
-    } else {
-        const isDuplicate = result.message.includes('Ya registraste');
-        card.innerHTML = `
-            <div style="padding:20px 0;">
-                <div style="font-size:4rem;margin-bottom:16px;">${isDuplicate ? '<i class="fas fa-circle-info"></i>' : '<i class="fas fa-circle-xmark"></i>'}</div>
-                <h2>${isDuplicate ? 'Ya Registrado' : 'Error'}</h2>
-                <p style="color:var(--text-secondary);margin:12px 0;">${result.message}</p>
-                <a href="bailarin/dashboard.php" class="btn btn-primary">Ir a Mi Panel</a>
+                <div style="font-size:4rem;margin-bottom:16px;"><i class="fas fa-circle-xmark"></i></div>
+                <h2>Error de Conexión</h2>
+                <p style="color:var(--text-secondary);margin:12px 0;">${e.message || 'No se pudo conectar con el servidor'}</p>
+                <button class="btn btn-primary" onclick="location.reload()">Reintentar</button>
             </div>`;
     }
 }
@@ -89,6 +106,7 @@ async function registerAttendance() {
 // Handle login form
 const loginForm = document.getElementById('qrLoginForm');
 if (loginForm) {
+    console.log('[REGISTRO] Formulario de login detectado');
     loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const cedula = document.getElementById('qrCedula').value.trim();
@@ -97,18 +115,22 @@ if (loginForm) {
 
         if (!cedula || !password) return showToast('Completa todos los campos', 'warning');
 
+        console.log('[REGISTRO] Login desde QR para:', cedula);
         btn.disabled = true;
         btn.textContent = 'Ingresando...';
 
         const result = await api('api/auth/login.php', 'POST', { cedula, password });
+        console.log('[REGISTRO] Login result:', JSON.stringify(result).substring(0, 200));
 
         if (result.success) {
+            console.log('[REGISTRO] Login exitoso, registrando asistencia...');
             showToast('¡Bienvenido!', 'success');
             document.getElementById('loginPrompt').innerHTML = `
                 <div class="spinner" style="margin:20px auto;"></div>
                 <h2 style="margin-top:16px;">Registrando asistencia...</h2>`;
             setTimeout(() => registerAttendance(), 1000);
         } else {
+            console.warn('[REGISTRO] Login falló:', result.message);
             showToast(result.message || 'Error al iniciar sesión', 'error');
             btn.disabled = false;
             btn.textContent = 'Iniciar Sesión y Registrar';
@@ -118,7 +140,10 @@ if (loginForm) {
 
 // If already logged in, register immediately
 if (IS_LOGGED_IN && QR_TOKEN) {
+    console.log('[REGISTRO] Usuario ya logueado, registrando asistencia...');
     registerAttendance();
+} else {
+    console.log('[REGISTRO] Esperando login del usuario');
 }
 </script>
 

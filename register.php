@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (isset($_SESSION['user_id'])) {
+require_once 'config/init.php';
+if (isLoggedIn()) {
     if ($_SESSION['rol'] === 'admin') {
         header('Location: admin/dashboard.php');
     } else {
@@ -72,6 +72,7 @@ include 'includes/header.php';
 </div>
 
 <script>
+console.log('[REGISTER] Página cargada');
 document.getElementById('registerForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -82,31 +83,38 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     const btn = document.getElementById('registerBtn');
 
     if (!nombre || !cedula || !password) {
+        console.warn('[REGISTER] Campos incompletos');
         showToast('Completa todos los campos', 'warning');
         return;
     }
 
     if (password !== passwordConfirm) {
+        console.warn('[REGISTER] Contraseñas no coinciden');
         showToast('Las contraseñas no coinciden', 'error');
         return;
     }
 
     if (password.length < 4) {
+        console.warn('[REGISTER] Contraseña muy corta');
         showToast('La contraseña debe tener al menos 4 caracteres', 'warning');
         return;
     }
 
+    console.log('[REGISTER] Registrando usuario:', nombre, cedula);
     btn.disabled = true;
     btn.textContent = 'Registrando...';
 
     const result = await api('api/auth/register.php', 'POST', { nombre, cedula, password });
+    console.log('[REGISTER] Resultado:', JSON.stringify(result).substring(0, 300));
 
     if (result.success) {
+        console.log('[REGISTER] Registro exitoso');
         showToast(result.message, 'success');
         setTimeout(() => {
             window.location.href = 'index.php';
         }, 2000);
     } else {
+        console.warn('[REGISTER] Error:', result.message);
         showToast(result.message || 'Error al registrarse', 'error');
         btn.disabled = false;
         btn.textContent = 'Crear Cuenta';

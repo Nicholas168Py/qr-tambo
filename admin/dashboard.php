@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'admin') {
+require_once __DIR__ . '/../config/init.php';
+if (!isLoggedIn() || $_SESSION['rol'] !== 'admin') {
     header('Location: ../index.php');
     exit;
 }
@@ -158,8 +158,12 @@ include '../includes/header.php';
     </main>
 </div>
 
+<?php include '../includes/footer.php'; ?>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+console.log('[ADMIN] Dashboard cargado');
+
 // Sidebar
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
@@ -167,6 +171,7 @@ function toggleSidebar() {
 }
 
 function switchSection(sectionId, btn) {
+    console.log('[ADMIN] switchSection:', sectionId);
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
     document.getElementById('section-' + sectionId).classList.add('active');
@@ -188,6 +193,7 @@ function switchSection(sectionId, btn) {
 
 // Resumen
 async function loadResumen() {
+    console.log('[ADMIN] loadResumen()');
     const [c, h, u, a] = await Promise.all([
         api('../api/clases/list.php'),
         api('../api/horarios/list.php'),
@@ -202,6 +208,7 @@ async function loadResumen() {
 
 // Clases CRUD
 async function loadClases() {
+    console.log('[ADMIN] loadClases()');
     const result = await api('../api/clases/list.php');
     const container = document.getElementById('clasesList');
     if (!result.success || result.data.length === 0) {
@@ -222,6 +229,7 @@ async function createClase() {
     const nombre = document.getElementById('claseNombre').value.trim();
     const desc = document.getElementById('claseDesc').value.trim();
     if (!nombre) return showToast('Ingresa un nombre para la clase', 'warning');
+    console.log('[ADMIN] createClase:', nombre);
     const result = await api('../api/clases/create.php', 'POST', { nombre, descripcion: desc });
     if (result.success) {
         showToast(result.message, 'success');
@@ -235,6 +243,7 @@ async function createClase() {
 
 async function deleteClase(id, nombre) {
     if (!confirm(`¿Eliminar la clase "${nombre}"? También se eliminarán sus horarios.`)) return;
+    console.log('[ADMIN] deleteClase:', id, nombre);
     const result = await api('../api/clases/delete.php', 'POST', { id });
     if (result.success) { showToast(result.message, 'success'); loadClases(); }
     else showToast(result.message, 'error');
@@ -245,8 +254,10 @@ const DAYS_LABELS = { 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 
 const DAYS_ORDER = [1, 2, 3, 4, 5, 6];
 
 async function loadHorarios() {
+    console.log('[ADMIN] loadHorarios()');
     const result = await api('../api/horarios/list.php');
     const container = document.getElementById('horariosList');
+    console.log('[ADMIN] Horarios desde API:', JSON.stringify(result.data).substring(0, 500));
 
     if (!result.success || result.data.length === 0) {
         container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-calendar-alt"></i></span><p>No hay horarios configurados. Agregá uno arriba.</p></div>';
@@ -271,11 +282,11 @@ async function loadHorarios() {
 
     timeSlots.forEach(hora => {
         html += `<tr><td style="text-align:right;padding-right:10px;color:var(--text-muted);font-size:0.78rem;white-space:nowrap;">${formatTime(hora)}</td>`;
-        DAYS_ORDER.forEach(dia => {
+        DAYS_ORDER.forEach((dia, colIdx) => {
             const h = grid[hora] && grid[hora][dia];
             if (h) {
                 const name = h.clase_nombre.replace(/'/g, "\\'");
-                html += `<td class="slot-class">
+                html += `<td class="slot-class" data-dia="${h.dia_semana}" data-col="${colIdx + 1}" title="${h.clase_nombre}">
                     <span class="class-name">${h.clase_nombre}</span>
                     <button class="btn-sm-ghost" onclick="deleteHorario(${h.id}, '${name}')" title="Eliminar"><i class="fas fa-trash" style="color: red; background: none;"></i></button>
                 </td>`;
@@ -287,10 +298,16 @@ async function loadHorarios() {
     });
 
     html += '</tbody></table></div>';
+    console.log('[ADMIN] Grid HTML generado');
     container.innerHTML = html;
+
+    // Debug: logear las columnas del header
+    const headerCells = container.querySelectorAll('thead th');
+    console.log('[ADMIN] Columnas del grid:', Array.from(headerCells).map(th => th.textContent).join(' | '));
 }
 
 async function loadClasesSelect() {
+    console.log('[ADMIN] loadClasesSelect()');
     const result = await api('../api/clases/list.php');
     const select = document.getElementById('horarioClase');
     if (result.success) {
@@ -305,6 +322,7 @@ async function createHorario() {
     const hora_inicio = document.getElementById('horarioInicio').value;
     const hora_fin = document.getElementById('horarioFin').value;
     if (!clase_id || !hora_inicio || !hora_fin) return showToast('Completa todos los campos', 'warning');
+    console.log('[ADMIN] createHorario:', { clase_id, dia_semana, hora_inicio, hora_fin });
     const result = await api('../api/horarios/create.php', 'POST', { clase_id, dia_semana, hora_inicio, hora_fin });
     if (result.success) {
         showToast(result.message, 'success');
@@ -316,6 +334,7 @@ async function createHorario() {
 
 async function deleteHorario(id, nombre) {
     if (!confirm(`¿Eliminar "${nombre}" de este horario?`)) return;
+    console.log('[ADMIN] deleteHorario:', id, nombre);
     const result = await api('../api/horarios/delete.php', 'POST', { id });
     if (result.success) { showToast(result.message, 'success'); loadHorarios(); }
     else showToast(result.message, 'error');
@@ -323,6 +342,7 @@ async function deleteHorario(id, nombre) {
 
 // Asistencia
 async function loadAsistencia() {
+    console.log('[ADMIN] loadAsistencia()');
     const params = new URLSearchParams();
     const fecha = document.getElementById('filtroFecha').value;
     const cedula = document.getElementById('filtroCedula').value.trim();
@@ -348,6 +368,7 @@ async function loadAsistencia() {
 }
 
 function resetFiltros() {
+    console.log('[ADMIN] resetFiltros()');
     document.getElementById('filtroFecha').value = '';
     document.getElementById('filtroCedula').value = '';
     document.getElementById('filtroClase').value = '';
@@ -356,6 +377,7 @@ function resetFiltros() {
 
 // Reportes
 async function loadReporte() {
+    console.log('[ADMIN] loadReporte()');
     const mes = document.getElementById('reporteMes').value;
     let anio = document.getElementById('reporteAnio').value;
     if (!anio) anio = new Date().getFullYear();
@@ -397,6 +419,7 @@ async function loadReporte() {
 
 // Bailarines
 async function loadBailarines() {
+    console.log('[ADMIN] loadBailarines()');
     const result = await api('../api/usuarios/list.php');
     const container = document.getElementById('bailarinesList');
     const totalEl = document.getElementById('totalBailarinesCount');
@@ -426,6 +449,7 @@ async function loadBailarines() {
 
 async function deleteBailarin(id, nombre) {
     if (!confirm(`¿Eliminar la cuenta de "${nombre}"?\n\nSe eliminará permanentemente.`)) return;
+    console.log('[ADMIN] deleteBailarin:', id, nombre);
     const result = await api('../api/usuarios/delete.php', 'POST', { id });
     if (result.success) {
         showToast(result.message, 'success');
@@ -436,10 +460,9 @@ async function deleteBailarin(id, nombre) {
 }
 
 // Init
+console.log('[ADMIN] Inicializando dashboard...');
 loadResumen();
 
 document.getElementById('reporteMes').value = new Date().getMonth() + 1;
 document.getElementById('reporteAnio').value = new Date().getFullYear();
 </script>
-
-<?php include '../includes/footer.php'; ?>

@@ -832,10 +832,6 @@ tbody tr:last-child td {
     border: 1px solid rgba(240, 194, 127, 0.2);
     cursor: default;
     position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 6px;
 }
 
 .schedule-grid td.slot-class .class-name {

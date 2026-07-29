@@ -1,6 +1,6 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['rol'] !== 'bailarin') {
+require_once __DIR__ . '/../config/init.php';
+if (!isLoggedIn() || $_SESSION['rol'] !== 'bailarin') {
     header('Location: ../index.php');
     exit;
 }
