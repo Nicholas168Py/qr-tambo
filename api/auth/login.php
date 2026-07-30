@@ -23,8 +23,22 @@ try {
     $stmt->execute([$cedula]);
     $user = $stmt->fetch();
 
-    if (!$user || !password_verify($password, $user['password_hash'])) {
+    if (!$user) {
         jsonResponse(['success' => false, 'message' => 'Cédula o contraseña incorrectos'], 401);
+    }
+
+    $storedHash = $user['password_hash'];
+
+    // Support plain-text fallback during migration
+    if (!password_verify($password, $storedHash)) {
+        if ($password === $storedHash) {
+            // Plain-text match → hash and update
+            $newHash = password_hash($password, PASSWORD_DEFAULT);
+            $upd = $db->prepare("UPDATE usuarios SET password_hash = ? WHERE id = ?");
+            $upd->execute([$newHash, $user['id']]);
+        } else {
+            jsonResponse(['success' => false, 'message' => 'Cédula o contraseña incorrectos'], 401);
+        }
     }
 
     // Set session

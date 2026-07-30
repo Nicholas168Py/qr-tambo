@@ -21,6 +21,22 @@ if ($isApi) {
     header('Content-Type: application/json; charset=utf-8');
 }
 
+// Session persistence: keep session until explicit logout
+$tenYears = 10 * 365 * 24 * 60 * 60;
+ini_set('session.cookie_lifetime', $tenYears);
+ini_set('session.gc_maxlifetime', $tenYears);
+ini_set('session.cache_expire', $tenYears / 60);
+ini_set('session.use_cookies', 1);
+ini_set('session.use_only_cookies', 1);
+session_set_cookie_params([
+    'lifetime' => $tenYears,
+    'path' => '/',
+    'domain' => '',
+    'secure' => false,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
 // Start session if not already started
 if (session_status() === PHP_SESSION_NONE) {
     session_start();

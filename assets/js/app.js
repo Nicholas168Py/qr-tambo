@@ -7,37 +7,42 @@
 // ============================================
 async function api(endpoint, method = 'GET', data = null) {
     const logData = data ? JSON.stringify(data).substring(0, 200) : '';
-    console.log(`[API] -> ${method} ${endpoint}`, logData);
+    const separator = endpoint.includes('?') ? '&' : '?';
+    const cacheBuster = `_t=${Date.now()}`;
+    const url = method === 'GET' ? `${endpoint}${separator}${cacheBuster}` : endpoint;
+    console.log(`[API] -> ${method} ${url}`, logData);
     const options = {
         method: method,
+        credentials: 'same-origin',
         headers: {
-            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
         },
     };
 
     if (data && method !== 'GET') {
+        options.headers['Content-Type'] = 'application/json';
         options.body = JSON.stringify(data);
     }
 
     try {
-        const response = await fetch(endpoint, options);
-        console.log(`[API] <- ${response.status} ${endpoint}`);
+        const response = await fetch(url, options);
+        console.log(`[API] <- ${response.status} ${url}`);
         const text = await response.text();
         if (!text) {
-            console.error(`[API] Respuesta vacía de ${endpoint}`);
+            console.error(`[API] Respuesta vacía de ${url}`);
             return { success: false, message: 'Respuesta vacía del servidor', code: response.status };
         }
         let result;
         try {
             result = JSON.parse(text);
         } catch (e) {
-            console.error(`[API] JSON inválido desde ${endpoint}:`, text.substring(0, 500));
+            console.error(`[API] JSON inválido desde ${url}:`, text.substring(0, 500));
             return { success: false, message: 'Error del servidor', code: response.status, raw: text.substring(0, 200) };
         }
-        console.log(`[API] OK ${endpoint}`, JSON.stringify(result).substring(0, 300));
+        console.log(`[API] OK ${url}`, JSON.stringify(result).substring(0, 300));
         return result;
     } catch (error) {
-        console.error(`[API] FETCH ERROR ${method} ${endpoint}:`, error.message || error);
+        console.error(`[API] FETCH ERROR ${method} ${url}:`, error.message || error);
         return { success: false, message: 'Error de conexión con el servidor: ' + (error.message || '') };
     }
 }

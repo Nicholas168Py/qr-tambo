@@ -10,7 +10,6 @@ include '../includes/header.php';
 ?>
 <div class="admin-layout">
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    <button class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
 
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
@@ -66,9 +65,9 @@ include '../includes/header.php';
                 <div class="glass-card stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div><div class="stat-value" id="totalBailarines">-</div><div class="stat-label">Bailarines</div></div>
                 <div class="glass-card stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><div class="stat-value" id="totalAsistencia">-</div><div class="stat-label">Asistencias este mes</div></div>
             </div>
-            <div class="glass-card" style="padding:24px;">
-                <h3 style="margin-bottom:16px;"><i class="fas fa-bolt"></i> Acceso Rápido</h3>
-                <div style="display:flex;gap:12px;flex-wrap:wrap;">
+            <div class="glass-card" style="padding:20px;">
+                <h3 style="margin-bottom:12px;"><i class="fas fa-bolt"></i> Acceso Rápido</h3>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
                     <a href="qr_dia.php" class="btn btn-primary"><i class="fas fa-qrcode"></i> Generar QR del Día</a>
                     <button class="btn btn-secondary" onclick="switchSection('clases', document.querySelector('[data-section=clases]'))"><i class="fas fa-music"></i> Gestionar Clases</button>
                     <button class="btn btn-secondary" onclick="switchSection('horarios', document.querySelector('[data-section=horarios]'))"><i class="fas fa-calendar-alt"></i> Configurar Horarios</button>
@@ -102,6 +101,17 @@ include '../includes/header.php';
                 <div class="form-group"><input type="time" id="horarioInicio" class="form-input" required></div>
                 <div class="form-group"><input type="time" id="horarioFin" class="form-input" required></div>
                 <button class="btn btn-primary" onclick="createHorario()">+ Agregar</button>
+            </div>
+            <div class="glass-card" style="padding:12px;margin-bottom:16px;">
+                <div class="day-slider" id="adminDaySlider">
+                    <div class="day-slider-indicator" id="adminDayIndicator"></div>
+                    <button class="day-slider-btn active" data-day="1" onclick="switchAdminDay(this, 0)">Lun</button>
+                    <button class="day-slider-btn" data-day="2" onclick="switchAdminDay(this, 1)">Mar</button>
+                    <button class="day-slider-btn" data-day="3" onclick="switchAdminDay(this, 2)">Mié</button>
+                    <button class="day-slider-btn" data-day="4" onclick="switchAdminDay(this, 3)">Jue</button>
+                    <button class="day-slider-btn" data-day="5" onclick="switchAdminDay(this, 4)">Vie</button>
+                    <button class="day-slider-btn" data-day="6" onclick="switchAdminDay(this, 5)">Sáb</button>
+                </div>
             </div>
             <div id="horariosList">
                 <div class="empty-state"><span class="empty-icon"><i class="fas fa-calendar-alt"></i></span>Cargando horario semanal...</div>
@@ -147,10 +157,10 @@ include '../includes/header.php';
 
         <!-- Bailarines Section -->
         <div class="section" id="section-bailarines">
-            <div class="glass-card" style="padding:24px;margin-bottom:20px;">
+            <div class="glass-card" style="padding:20px;margin-bottom:16px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
                     <h3><i class="fas fa-users"></i> Bailarines Registrados</h3>
-                    <span id="totalBailarinesCount" style="font-size:0.9rem;color:var(--text-secondary);padding:6px 14px;background:rgba(255,255,255,0.06);border-radius:50px;"></span>
+                    <span id="totalBailarinesCount" style="font-size:0.85rem;color:var(--text-secondary);padding:5px 12px;background:rgba(255,255,255,0.06);border-radius:50px;"></span>
                 </div>
             </div>
             <div id="bailarinesList"><div class="empty-state"><span class="empty-icon"><i class="fas fa-users"></i></span>Cargando bailarines...</div></div>
@@ -164,16 +174,23 @@ include '../includes/header.php';
 <script>
 console.log('[ADMIN] Dashboard cargado');
 
-// Sidebar
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('open');
 }
 
+function toggleSidebarClose() {
+    const s = document.getElementById('sidebar');
+    if (s.classList.contains('open')) {
+        s.classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+}
+
 function switchSection(sectionId, btn) {
     console.log('[ADMIN] switchSection:', sectionId);
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-link').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.sidebar .nav-link').forEach(n => n.classList.remove('active'));
     document.getElementById('section-' + sectionId).classList.add('active');
     if (btn) btn.classList.add('active');
 
@@ -188,7 +205,7 @@ function switchSection(sectionId, btn) {
     if (sectionId === 'reportes') loadReporte();
     if (sectionId === 'bailarines') loadBailarines();
 
-    if (window.innerWidth <= 768) toggleSidebar();
+    toggleSidebarClose();
 }
 
 // Resumen
@@ -250,60 +267,111 @@ async function deleteClase(id, nombre) {
 }
 
 // Horarios
-const DAYS_LABELS = { 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado' };
-const DAYS_ORDER = [1, 2, 3, 4, 5, 6];
+const ADMIN_DAY_NAMES = {1:'Lunes',2:'Martes',3:'Miércoles',4:'Jueves',5:'Viernes',6:'Sábado'};
+let adminAllHorarios = [];
+let adminCurrentDay = (new Date().getDay() || 7);
+if (adminCurrentDay > 6) adminCurrentDay = 1;
+
+function switchAdminDay(el, idx) {
+    const indicator = document.getElementById('adminDayIndicator');
+    const slider = document.getElementById('adminDaySlider');
+    const step = slider.offsetWidth / 6;
+    indicator.style.transform = `translateX(${idx * step}px)`;
+    document.querySelectorAll('#adminDaySlider .day-slider-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    adminCurrentDay = parseInt(el.dataset.day);
+    renderAdminTimeline();
+}
 
 async function loadHorarios() {
     console.log('[ADMIN] loadHorarios()');
     const result = await api('../api/horarios/list.php');
-    const container = document.getElementById('horariosList');
-    console.log('[ADMIN] Horarios desde API:', JSON.stringify(result.data).substring(0, 500));
+    if (!result.success || !result.data.length) {
+        document.getElementById('horariosList').innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-calendar-alt"></i></span><p>No hay horarios configurados. Agregá uno arriba.</p></div>';
+        return;
+    }
+    adminAllHorarios = result.data;
+    const dayBtns = document.querySelectorAll('#adminDaySlider .day-slider-btn');
+    const slider = document.getElementById('adminDaySlider');
+    const step = slider.offsetWidth / 6;
+    dayBtns.forEach((b, i) => {
+        if (parseInt(b.dataset.day) === adminCurrentDay) {
+            b.classList.add('active');
+            document.getElementById('adminDayIndicator').style.transform = `translateX(${i * step}px)`;
+        }
+    });
+    renderAdminTimeline();
+}
 
-    if (!result.success || result.data.length === 0) {
-        container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-calendar-alt"></i></span><p>No hay horarios configurados. Agregá uno arriba.</p></div>';
+function renderAdminTimeline() {
+    const container = document.getElementById('horariosList');
+    const daySchedules = adminAllHorarios.filter(h => h.dia_semana == adminCurrentDay);
+    if (!daySchedules.length) {
+        container.innerHTML = '<div class="empty-state" style="padding:40px 16px;"><span class="empty-icon"><i class="fas fa-calendar-alt"></i></span><p>No hay clases para este día</p></div>';
         return;
     }
 
-    const horarios = result.data;
-
-    const timeSlots = [...new Set(horarios.map(h => h.hora_inicio))].sort();
-
-    const grid = {};
-    horarios.forEach(h => {
-        const key = h.hora_inicio;
-        if (!grid[key]) grid[key] = {};
-        grid[key][h.dia_semana] = h;
-    });
-
-    let html = '<div class="schedule-grid-wrapper"><table class="schedule-grid">';
-    html += '<thead><tr><th>Hora</th>';
-    DAYS_ORDER.forEach(d => { html += `<th>${DAYS_LABELS[d]}</th>`; });
-    html += '</tr></thead><tbody>';
-
-    timeSlots.forEach(hora => {
-        html += `<tr><td style="text-align:right;padding-right:10px;color:var(--text-muted);font-size:0.78rem;white-space:nowrap;">${formatTime(hora)}</td>`;
-        DAYS_ORDER.forEach((dia, colIdx) => {
-            const h = grid[hora] && grid[hora][dia];
-            if (h) {
-                const name = h.clase_nombre.replace(/'/g, "\\'");
-                html += `<td class="slot-class" data-dia="${h.dia_semana}" data-col="${colIdx + 1}" title="${h.clase_nombre}">
-                    <span class="class-name">${h.clase_nombre}</span>
-                    <button class="btn-sm-ghost" onclick="deleteHorario(${h.id}, '${name}')" title="Eliminar"><i class="fas fa-trash" style="color: red; background: none;"></i></button>
-                </td>`;
-            } else {
-                html += '<td class="slot-empty"><i class="fas fa-minus"></i></td>';
-            }
+    // Desktop: grid table
+    if (window.innerWidth > 768) {
+        daySchedules.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
+        const timeSlots = [...new Set(adminAllHorarios.map(h => h.hora_inicio))].sort();
+        const grid = {};
+        adminAllHorarios.forEach(h => {
+            const key = h.hora_inicio;
+            if (!grid[key]) grid[key] = {};
+            grid[key][h.dia_semana] = h;
         });
-        html += '</tr>';
-    });
+        const DAYS_ORDER = [1, 2, 3, 4, 5, 6];
+        let html = '<div class="schedule-grid-wrapper"><table class="schedule-grid">';
+        html += '<thead><tr><th>Hora</th>';
+        DAYS_ORDER.forEach(d => { html += `<th>${ADMIN_DAY_NAMES[d]}</th>`; });
+        html += '</tr></thead><tbody>';
+        timeSlots.forEach(hora => {
+            html += `<tr><td style="text-align:right;padding-right:10px;color:var(--text-muted);font-size:0.78rem;white-space:nowrap;">${formatTime(hora)}</td>`;
+            DAYS_ORDER.forEach(dia => {
+                const h = grid[hora] && grid[hora][dia];
+                if (h) {
+                    const name = h.clase_nombre.replace(/'/g, "\\'");
+                    html += `<td class="slot-class" title="${h.clase_nombre}">
+                        <span class="class-name">${h.clase_nombre}</span>
+                        <button class="btn-sm-ghost" onclick="deleteHorario(${h.id}, '${name}')" title="Eliminar"><i class="fas fa-trash" style="color:red;background:none;"></i></button>
+                    </td>`;
+                } else {
+                    html += '<td class="slot-empty"><i class="fas fa-minus"></i></td>';
+                }
+            });
+            html += '</tr>';
+        });
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+        return;
+    }
 
-    html += '</tbody></table></div>';
-    console.log('[ADMIN] Grid HTML generado');
-    container.innerHTML = html;
-
-    // Debug: logear las columnas del header
-    const headerCells = container.querySelectorAll('thead th');
-    console.log('[ADMIN] Columnas del grid:', Array.from(headerCells).map(th => th.textContent).join(' | '));
+    // Mobile: timeline
+    daySchedules.sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio));
+    container.innerHTML = '<div class="timeline-container">' + daySchedules.map((h, i) => {
+        const name = h.clase_nombre.replace(/'/g, "\\'");
+        return `<div class="timeline-card" style="animation-delay:${i * 0.08}s;">
+            <div class="timeline-time">
+                ${formatTime(h.hora_inicio)}
+                <div class="timeline-dot"></div>
+            </div>
+            <div class="timeline-body">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+                    <div>
+                        <h3>${h.clase_nombre}</h3>
+                        <div class="meta">
+                            <span><i class="far fa-clock"></i> ${formatTime(h.hora_inicio)} - ${formatTime(h.hora_fin)}</span>
+                            <span><i class="fas fa-calendar-day"></i> ${ADMIN_DAY_NAMES[h.dia_semana]}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="deleteHorario(${h.id}, '${name}')" style="flex-shrink:0;padding:6px 10px;font-size:0.78rem;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>`;
+    }).join('') + '</div>';
 }
 
 async function loadClasesSelect() {
@@ -461,7 +529,41 @@ async function deleteBailarin(id, nombre) {
 
 // Init
 console.log('[ADMIN] Inicializando dashboard...');
-loadResumen();
+
+document.querySelectorAll('.bottom-nav .nav-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+        toggleSidebarClose();
+    });
+});
+
+// Recalcular indicador day-slider al redimensionar
+let adminResizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(adminResizeTimer);
+    adminResizeTimer = setTimeout(function() {
+        const slider = document.getElementById('adminDaySlider');
+        if (!slider) return;
+        const step = slider.offsetWidth / 6;
+        const active = slider.querySelector('.day-slider-btn.active');
+        if (active) {
+            const idx = Array.from(slider.querySelectorAll('.day-slider-btn')).indexOf(active);
+            document.getElementById('adminDayIndicator').style.transform = `translateX(${idx * step}px)`;
+        }
+    }, 150);
+});
+
+function getUrlParam(name) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get(name);
+}
+
+const sectionParam = getUrlParam('section');
+if (sectionParam && ['clases', 'horarios', 'asistencia', 'reportes', 'bailarines'].includes(sectionParam)) {
+    const btn = document.querySelector(`.sidebar .nav-link[data-section="${sectionParam}"]`);
+    switchSection(sectionParam, btn);
+} else {
+    loadResumen();
+}
 
 document.getElementById('reporteMes').value = new Date().getMonth() + 1;
 document.getElementById('reporteAnio').value = new Date().getFullYear();

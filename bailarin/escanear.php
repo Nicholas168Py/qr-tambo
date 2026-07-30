@@ -8,21 +8,12 @@ $pageTitle = 'Escanear QR';
 $basePath = '../';
 include '../includes/header.php';
 ?>
-<div class="bailarin-layout">
-    <header class="bailarin-header">
-        <h2><i class="fas fa-music"></i> QR Tambo</h2>
-        <div class="bailarin-header-actions" style="display:flex;align-items:center;gap:12px;">
-            <span><?= htmlspecialchars($_SESSION['nombre']) ?></span>
-            <span class="badge badge-bailarin">Bailarín</span>
-            <button class="btn btn-secondary btn-sm" onclick="window.location.href='dashboard.php'"><i class="fas fa-arrow-left"></i> Volver</button>
-        </div>
-    </header>
-
-    <main class="bailarin-main">
-        <div class="glass-card" style="padding:24px;">
-            <h2 style="text-align:center;margin-bottom:20px;"><i class="fas fa-camera"></i> Escanea el Código QR</h2>
+<div class="page-wrapper">
+    <main class="bailarin-main" style="max-width:500px;margin:0 auto;padding:20px 16px;padding-top:16px;">
+        <div class="glass-card" style="padding:20px;">
+            <h2 style="text-align:center;margin-bottom:16px;"><i class="fas fa-camera"></i> Escanea el Código QR</h2>
             <p style="text-align:center;color:var(--text-secondary);margin-bottom:20px;">
-            Apunta la cámara al código QR que muestra el instructor
+                Apunta la cámara al código QR que muestra el instructor
             </p>
             <div id="scanner-container"></div>
             <div id="scanResult">
@@ -40,6 +31,6 @@ include '../includes/header.php';
 </div>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="../assets/js/qr-scanner.js"></script>
+<script src="../assets/js/qr-scanner.js?v=<?= filemtime(__DIR__ . '/../assets/js/qr-scanner.js') ?>"></script>
 
 <?php include '../includes/footer.php'; ?>
