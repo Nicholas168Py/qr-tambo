@@ -323,6 +323,7 @@
 
             var cedula = document.getElementById('cedula').value.trim();
             var password = document.getElementById('password').value;
+            var rememberMe = document.getElementById('rememberMe');
 
             if (!cedula || !password) {
                 showToast('Completa todos los campos', 'warning');
@@ -334,7 +335,11 @@
                 btn.disabled = true;
             }
 
-            var result = await api('api/auth/login.php', 'POST', { cedula: cedula, password: password });
+            var result = await api('api/auth/login.php', 'POST', {
+                cedula: cedula,
+                password: password,
+                recordarme: rememberMe ? rememberMe.checked : true
+            });
 
             if (result.success) {
                 showToast('¡Bienvenido, ' + result.data.nombre + '!', 'success');

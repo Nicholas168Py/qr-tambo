@@ -394,6 +394,37 @@
     background: var(--white-08);
 }
 
+.login-options {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 2px 2px 20px;
+}
+
+.remember-me {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    color: var(--white-50);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: color 0.25s;
+}
+
+.remember-me:hover {
+    color: var(--white-70);
+}
+
+.remember-me input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--primary);
+    cursor: pointer;
+}
+
 /* ============================================================
    Botón principal: Shine + Ripple + Glow + Elevación
    ============================================================ */

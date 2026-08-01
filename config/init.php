@@ -4,7 +4,28 @@
  * Session management, headers, and helper functions
  */
 
-error_reporting(0);
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+
+// Log de errores a archivo (logs/php_errors.log) para diagnosticar 500 en producción
+$logDir = __DIR__ . '/../logs';
+if (!is_dir($logDir)) {
+    @mkdir($logDir, 0775, true);
+}
+if (is_writable($logDir)) {
+    ini_set('log_errors', '1');
+    ini_set('error_log', $logDir . '/php_errors.log');
+}
+
+// Cargar config para APP_TIMEZONE y credenciales
+require_once __DIR__ . '/config.php';
+
+// Zona horaria de la academia (corrige desfases de hora en asistencia/QR)
+if (defined('APP_TIMEZONE')) {
+    date_default_timezone_set(APP_TIMEZONE);
+} else {
+    date_default_timezone_set('America/Guayaquil');
+}
 
 // Ensure sessions work on InfinityFree (writable path)
 $sessDir = __DIR__ . '/../sessions';

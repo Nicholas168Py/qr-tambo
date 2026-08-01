@@ -44,12 +44,12 @@ include 'includes/header.php';
                 <p class="brand-tagline">Sistema de Asistencia · Clases de Baile</p>
             </div>
 
-            <form id="loginForm" autocomplete="off">
+            <form id="loginForm" autocomplete="on">
                 <div class="input-group">
                     <label for="cedula">Cédula</label>
                     <div class="input-control">
                         <i class="fas fa-user input-icon" aria-hidden="true"></i>
-                        <input type="text" id="cedula" name="cedula" class="form-input" placeholder="Ingresa tu cédula" required autofocus>
+                        <input type="text" id="cedula" name="cedula" class="form-input" placeholder="Ingresa tu cédula" required autofocus autocomplete="username">
                         <span class="input-focus"></span>
                     </div>
                 </div>
@@ -58,10 +58,17 @@ include 'includes/header.php';
                     <label for="password">Contraseña</label>
                     <div class="input-control">
                         <i class="fas fa-lock input-icon" aria-hidden="true"></i>
-                        <input type="password" id="password" name="password" class="form-input" placeholder="Ingresa tu contraseña" required>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Ingresa tu contraseña" required autocomplete="current-password">
                         <button type="button" class="input-toggle" id="passwordToggle" aria-label="Mostrar contraseña"><i class="fas fa-eye"></i></button>
                         <span class="input-focus"></span>
                     </div>
+                </div>
+
+                <div class="login-options">
+                    <label class="remember-me" for="rememberMe">
+                        <input type="checkbox" id="rememberMe" name="recordarme" checked>
+                        Recordarme
+                    </label>
                 </div>
 
                 <button type="submit" class="login-btn" id="loginBtn">

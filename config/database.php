@@ -16,9 +16,19 @@ class Database {
     private $connection;
 
     private function __construct() {
-        // Perfil local (XAMPP) — solo si config.php no apunta ya a local
+        // Perfil local (XAMPP) — solo en servidores de desarrollo.
+        // Evita intentar conectar a 127.0.0.1 en producción (InfinityFree).
+        $serverName = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
+        $httpHost = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : '';
+        $isLocalServer = (
+            $serverName === 'localhost' ||
+            $serverName === '127.0.0.1' ||
+            strpos($httpHost, '127.0.0.1') === 0 ||
+            $serverName === '' || $serverName === '::1'
+        );
+
         $profiles = [];
-        if (!in_array(DB_HOST, ['127.0.0.1', 'localhost'], true)) {
+        if ($isLocalServer && !in_array(DB_HOST, ['127.0.0.1', 'localhost'], true)) {
             $profiles[] = ['127.0.0.1', 'qr_tambo', 'root', ''];
         }
         $profiles[] = [DB_HOST, DB_NAME, DB_USER, DB_PASS];
