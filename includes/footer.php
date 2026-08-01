@@ -2,7 +2,7 @@
     <div id="loading-overlay" class="loading-overlay" style="display:none">
         <div class="spinner"></div>
     </div>
-    <div id="debug-panel" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#1a0a2e;color:#0f0;font-family:monospace;font-size:11px;padding:8px;max-height:40vh;overflow-y:auto;border-top:2px solid #f0f;padding-bottom:calc(var(--bottom-nav-height) + 8px);">
+    <div id="debug-panel" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#06080D;color:#0f0;font-family:monospace;font-size:11px;padding:8px;max-height:40vh;overflow-y:auto;border-top:2px solid #07C7F2;padding-bottom:calc(var(--bottom-nav-height) + 8px);">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
             <strong style="color:#fff;">🐛 DEBUG</strong>
             <button onclick="var p=document.getElementById('debug-panel');p.style.display='none'" style="background:none;border:none;color:#f66;cursor:pointer;font-size:14px;">✕</button>
@@ -64,15 +64,30 @@ if ($loggedInFooter):
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     var navItems = document.querySelectorAll('.bottom-nav .nav-item');
-    if (navItems.length) {
-        var currentPath = window.location.pathname;
-        navItems.forEach(function(item) {
-            var href = item.getAttribute('href');
-            if (href && currentPath.indexOf(href.replace('../', '').replace('./', '')) !== -1) {
+    if (!navItems.length) return;
+
+    // El menú hamburguesa solo debe abrirse con su botón:
+    // al tocar un ítem del menú inferior, si el sidebar está abierto, se cierra.
+    navItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+            closeSidebarIfOpen();
+        });
+    });
+
+    // Resaltar el ítem activo según ruta + sección (?section=...)
+    var currentPath = window.location.pathname;
+    var currentSection = new URLSearchParams(window.location.search).get('section');
+
+    navItems.forEach(function(item) {
+        var href = item.getAttribute('href') || '';
+        var cleanHref = href.replace('../', '').replace('./', '').split('?')[0];
+        if (cleanHref && currentPath.indexOf(cleanHref) !== -1) {
+            var itemSection = new URLSearchParams(href.split('?')[1] || '').get('section');
+            if (itemSection === currentSection || (itemSection === null && currentSection === null)) {
                 item.classList.add('active');
             }
-        });
-    }
+        }
+    });
 });
 </script>
 </body>

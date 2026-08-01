@@ -12,7 +12,7 @@ include '../includes/header.php';
     <main class="bailarin-main" style="max-width:500px;margin:0 auto;padding:20px 16px;padding-top:16px;">
         <!-- Perfil -->
         <div class="glass-card profile-card" style="text-align:center;padding:32px 24px;margin-bottom:20px;">
-            <div style="width:72px;height:72px;border-radius:50%;background:var(--gradient-accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:2rem;font-weight:700;color:#0a0a1a;">
+            <div style="width:72px;height:72px;border-radius:50%;background:var(--gradient-accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:2rem;font-weight:700;color:#06080D;">
                 <?= strtoupper(substr($_SESSION['nombre'], 0, 1)) ?>
             </div>
             <h2 style="margin-bottom:4px;"><?= htmlspecialchars($_SESSION['nombre']) ?></h2>

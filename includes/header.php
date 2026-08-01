@@ -18,6 +18,13 @@ $initial = $loggedIn ? strtoupper(substr($nombre, 0, 1)) : 'U';
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= $basePath ?>assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
     <link rel="stylesheet" href="<?= $basePath ?>assets/css/responsive.css?v=<?= filemtime(__DIR__ . '/../assets/css/responsive.css') ?>">
+    <?php if (!empty($extraCss) && is_array($extraCss)): ?>
+        <?php foreach ($extraCss as $cssFile): ?>
+            <?php if (file_exists(__DIR__ . '/../' . $cssFile)): ?>
+    <link rel="stylesheet" href="<?= $basePath ?><?= $cssFile ?>?v=<?= filemtime(__DIR__ . '/../' . $cssFile) ?>">
+            <?php endif; ?>
+        <?php endforeach; ?>
+    <?php endif; ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
@@ -35,7 +42,7 @@ $initial = $loggedIn ? strtoupper(substr($nombre, 0, 1)) : 'U';
             <i class="fas fa-bars"></i>
         </button>
         <?php endif; ?>
-        <span class="top-bar-logo"><i class="fas fa-music" style="margin-right:6px;"></i> QR TAMBO</span>
+        <span class="top-bar-logo"><img src="<?= $basePath ?>assets/logo1-white-removebg-preview.png" alt="QR Tambo" class="top-bar-logo-img"> QR TAMBO</span>
     </div>
     <div class="top-bar-avatar" title="<?= htmlspecialchars($nombre) ?>" onclick="window.location.href='<?= $basePath . ($isAdmin ? 'admin/dashboard.php' : 'bailarin/dashboard.php') ?>'">
         <?= $initial ?>

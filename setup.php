@@ -78,7 +78,7 @@ try {
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a, #1a0a2e, #16213e);
+            background: linear-gradient(135deg, #06080D, #0a0e18, #0d1424);
             color: #fff;
             min-height: 100vh;
             display: flex;
@@ -96,7 +96,7 @@ try {
             width: 100%;
         }
         h1 { text-align: center; margin-bottom: 10px; font-size: 2rem; }
-        h1 span { background: linear-gradient(135deg, #f0c27f, #fc5c7d); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h1 span { background: linear-gradient(135deg, #6BD9F2, #07B0F2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .subtitle { text-align: center; color: rgba(255,255,255,0.6); margin-bottom: 30px; }
         .step {
             display: flex;
@@ -125,12 +125,12 @@ try {
         .info-box {
             margin-top: 30px;
             padding: 20px;
-            background: rgba(106,130,251,0.1);
-            border: 1px solid rgba(106,130,251,0.3);
+            background: rgba(7,176,242,0.1);
+            border: 1px solid rgba(7,176,242,0.3);
             border-radius: 12px;
             text-align: center;
         }
-        .info-box h3 { color: #6a82fb; margin-bottom: 10px; }
+        .info-box h3 { color: #07C7F2; margin-bottom: 10px; }
         .info-box code {
             background: rgba(255,255,255,0.1);
             padding: 3px 8px;
@@ -141,8 +141,8 @@ try {
             display: inline-block;
             margin-top: 20px;
             padding: 12px 30px;
-            background: linear-gradient(135deg, #f0c27f, #fc5c7d);
-            color: #0a0a1a;
+            background: linear-gradient(135deg, #07B0F2, #07C7F2);
+            color: #06080D;
             text-decoration: none;
             border-radius: 10px;
             font-weight: 600;

@@ -104,7 +104,7 @@ function renderQR() {
         text: url,
         width: qrSize,
         height: qrSize,
-        colorDark: '#1a0a2e',
+        colorDark: '#06080D',
         colorLight: '#ffffff',
         correctLevel: QRCode.CorrectLevel.L
     });

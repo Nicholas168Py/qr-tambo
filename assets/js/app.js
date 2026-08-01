@@ -199,6 +199,16 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================
+// Sidebar Helpers
+// ============================================
+function closeSidebarIfOpen() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar) sidebar.classList.remove('open');
+    if (overlay) overlay.classList.remove('open');
+}
+
+// ============================================
 // Debug Console visible en pantalla
 // ============================================
 (function() {

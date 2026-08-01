@@ -2,6 +2,11 @@
 /**
  * QR Tambo - Database Connection
  * Singleton PDO connection
+ *
+ * Soporte dual de entorno:
+ *  - Local (XAMPP): intenta primero 127.0.0.1 / qr_tambo / root
+ *  - Producción (InfinityFree): usa las credenciales de config.php
+ * El primer perfil que conecta correctamente es el que se usa.
  */
 
 require_once __DIR__ . '/config.php';
@@ -11,27 +16,42 @@ class Database {
     private $connection;
 
     private function __construct() {
-        try {
-            $this->connection = new PDO(
-                "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-                DB_USER,
-                DB_PASS,
-                [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                    PDO::ATTR_EMULATE_PREPARES => false
-                ]
-            );
-        } catch (PDOException $e) {
-            http_response_code(500);
-            if (!headers_sent()) {
-                header('Content-Type: application/json; charset=utf-8');
-            }
-            die(json_encode([
-                'success' => false,
-                'message' => 'Error de conexión a la base de datos: ' . $e->getMessage()
-            ]));
+        // Perfil local (XAMPP) — solo si config.php no apunta ya a local
+        $profiles = [];
+        if (!in_array(DB_HOST, ['127.0.0.1', 'localhost'], true)) {
+            $profiles[] = ['127.0.0.1', 'qr_tambo', 'root', ''];
         }
+        $profiles[] = [DB_HOST, DB_NAME, DB_USER, DB_PASS];
+
+        $lastError = null;
+        foreach ($profiles as $profile) {
+            list($host, $name, $user, $pass) = $profile;
+            try {
+                $this->connection = new PDO(
+                    "mysql:host=" . $host . ";dbname=" . $name . ";charset=utf8mb4",
+                    $user,
+                    $pass,
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_EMULATE_PREPARES => false,
+                        PDO::ATTR_TIMEOUT => 3
+                    ]
+                );
+                return;
+            } catch (PDOException $e) {
+                $lastError = $e->getMessage();
+            }
+        }
+
+        http_response_code(500);
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
+        die(json_encode([
+            'success' => false,
+            'message' => 'Error de conexión a la base de datos: ' . $lastError
+        ]));
     }
 
     public static function getInstance() {

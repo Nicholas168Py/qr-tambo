@@ -9,11 +9,11 @@ $basePath = '../';
 include '../includes/header.php';
 ?>
 <div class="admin-layout">
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarIfOpen()"></div>
 
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
-            <h2><i class="fas fa-music"></i> QR Tambo</h2>
+            <img src="<?= $basePath ?>assets/logo1-white-removebg-preview.png" alt="QR Tambo" class="sidebar-logo-img">
             <small>Panel de Administración</small>
         </div>
         <nav class="sidebar-nav">

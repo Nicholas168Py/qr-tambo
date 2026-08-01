@@ -4,7 +4,7 @@ if (isLoggedIn()) {
     if ($_SESSION['rol'] === 'admin') {
         header('Location: admin/dashboard.php');
     } else {
-        header('Location: bailarin/dashboard.php');
+        header('Location: bailarin/escanear.php');
     }
     exit;
 }
