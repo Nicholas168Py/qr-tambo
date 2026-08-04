@@ -84,7 +84,7 @@ async function processQRCode(url) {
         if (window.location.pathname.includes('/admin/') || window.location.pathname.includes('/bailarin/')) {
             apiBase = '../';
         }
-        const endpoint = apiBase + 'api/asistencia/registrar.php';
+        const endpoint = apiBase + 'api/asistencia/registrar';
         console.log('[SCANNER] Llamando API:', endpoint);
         const result = await api(endpoint, 'POST', { token });
         console.log('[SCANNER] Respuesta API:', JSON.stringify(result).substring(0, 300));

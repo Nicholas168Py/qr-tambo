@@ -1,0 +1,8 @@
+# QR Tambo - API REST front controller
+# Enruta todas las peticiones /api/* a index.php
+RewriteEngine On
+
+# No reescribir si el archivo o directorio existe
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]

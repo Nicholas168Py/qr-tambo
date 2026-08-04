@@ -80,7 +80,7 @@ document.getElementById('changePasswordForm').addEventListener('submit', async (
     btn.disabled = true;
     btn.textContent = 'Actualizando...';
 
-    const result = await api('../api/usuarios/cambiar_password.php', 'POST', {
+    const result = await api('../api/auth/cambiar-password', 'POST', {
         current_password: currentPassword,
         new_password: newPassword,
         confirm_password: confirmPassword

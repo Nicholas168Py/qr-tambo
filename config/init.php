@@ -1,7 +1,7 @@
 <?php
 /**
- * QR Tambo - Initialization
- * Session management, headers, and helper functions
+ * QR Tambo - Bootstrap
+ * Configuración de entorno, sesiones, autoloader de capas y helpers globales.
  */
 
 error_reporting(E_ALL);
@@ -21,11 +21,7 @@ if (is_writable($logDir)) {
 require_once __DIR__ . '/config.php';
 
 // Zona horaria de la academia (corrige desfases de hora en asistencia/QR)
-if (defined('APP_TIMEZONE')) {
-    date_default_timezone_set(APP_TIMEZONE);
-} else {
-    date_default_timezone_set('America/Guayaquil');
-}
+date_default_timezone_set(defined('APP_TIMEZONE') ? APP_TIMEZONE : 'America/Guayaquil');
 
 // Ensure sessions work on InfinityFree (writable path)
 $sessDir = __DIR__ . '/../sessions';
@@ -63,121 +59,45 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include database
+// Include database connection
 require_once __DIR__ . '/database.php';
 
-/**
- * Check if user is logged in
- */
-function isLoggedIn() {
-    return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
-}
-
-/**
- * Require login - sends JSON error if not authenticated
- */
-function requireLogin() {
-    if (!isLoggedIn()) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Debes iniciar sesión para acceder'
-        ]);
-        exit;
-    }
-}
-
-/**
- * Require admin role
- */
-function requireAdmin() {
-    requireLogin();
-    if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'admin') {
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'message' => 'No tienes permisos de administrador'
-        ]);
-        exit;
-    }
-}
-
-/**
- * Send JSON response
- */
-function jsonResponse($data, $code = 200) {
-    http_response_code($code);
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode($data, JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-/**
- * Get current logged-in user data from session
- */
-function getCurrentUser() {
-    if (!isLoggedIn()) return null;
-    return [
-        'id' => $_SESSION['user_id'],
-        'cedula' => $_SESSION['cedula'],
-        'nombre' => $_SESSION['nombre'],
-        'rol' => $_SESSION['rol']
+// Autoloader PSR-4 simplificado para las capas de la aplicación
+spl_autoload_register(function ($class) {
+    $prefixes = [
+        'Models\\' => __DIR__ . '/../models/',
+        'Services\\' => __DIR__ . '/../services/',
+        'Controllers\\' => __DIR__ . '/../controllers/',
+        'Support\\' => __DIR__ . '/../support/'
     ];
-}
 
-/**
- * Sanitize input
- */
-function sanitize($input) {
-    if (is_array($input)) {
-        return array_map('sanitize', $input);
+    foreach ($prefixes as $prefix => $baseDir) {
+        if (strpos($class, $prefix) === 0) {
+            $file = $baseDir . str_replace('\\', '/', substr($class, strlen($prefix))) . '.php';
+            if (file_exists($file)) {
+                require_once $file;
+            }
+            break;
+        }
     }
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
+});
 
-/**
- * Get request body (handles both form data and JSON)
- */
-function getRequestBody() {
-    $contentType = isset($_SERVER['CONTENT_TYPE']) ? $_SERVER['CONTENT_TYPE'] : '';
+// Helpers globales (delegan a la capa Support) para compatibilidad con páginas y scripts existentes.
 
-    if (strpos($contentType, 'application/json') !== false) {
-        $json = file_get_contents('php://input');
-        $data = json_decode($json, true);
-        return $data ? $data : [];
-    }
+function isLoggedIn() { return \Support\Auth::isLoggedIn(); }
 
-    return $_POST;
-}
+function requireLogin() { return \Support\Auth::requireLogin(); }
 
-/**
- * Get Spanish day name
- */
-function getDayName($dayNumber) {
-    $days = [
-        1 => 'Lunes',
-        2 => 'Martes',
-        3 => 'Miércoles',
-        4 => 'Jueves',
-        5 => 'Viernes',
-        6 => 'Sábado',
-        7 => 'Domingo'
-    ];
-    return isset($days[$dayNumber]) ? $days[$dayNumber] : 'Desconocido';
-}
+function requireAdmin() { return \Support\Auth::requireAdmin(); }
 
-/**
- * Get Spanish month name
- */
-function getMonthName($monthNumber) {
-    $months = [
-        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo',
-        4 => 'Abril', 5 => 'Mayo', 6 => 'Junio',
-        7 => 'Julio', 8 => 'Agosto', 9 => 'Septiembre',
-        10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
-    ];
-    return isset($months[$monthNumber]) ? $months[$monthNumber] : 'Desconocido';
-}
+function getCurrentUser() { return \Support\Auth::currentUser(); }
 
-// Remove duplicate JSON header line at end
+function jsonResponse($data, $code = 200) { \Support\Http::jsonResponse($data, $code); }
 
+function getRequestBody() { return \Support\Http::getRequestBody(); }
+
+function sanitize($input) { return \Support\Http::sanitize($input); }
+
+function getDayName($dayNumber) { return \Support\Date::dayName($dayNumber); }
+
+function getMonthName($monthNumber) { return \Support\Date::monthName($monthNumber); }

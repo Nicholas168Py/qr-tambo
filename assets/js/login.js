@@ -1,7 +1,7 @@
 /**
  * QR Tambo — Login Premium
  * Escena: aurora, ondas SVG, partículas y mouse glow.
- * Lógica de login: conserva exactamente las peticiones a api/auth/login.php.
+ * Lógica de login: conserva exactamente las peticiones a api/auth/login.
  */
 (function () {
     'use strict';
@@ -335,7 +335,7 @@
                 btn.disabled = true;
             }
 
-            var result = await api('api/auth/login.php', 'POST', {
+            var result = await api('api/auth/login', 'POST', {
                 cedula: cedula,
                 password: password,
                 recordarme: rememberMe ? rememberMe.checked : true

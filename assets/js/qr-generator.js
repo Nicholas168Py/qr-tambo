@@ -14,7 +14,7 @@ function getApiBase() {
 
 async function loadDayClasses(dayNum) {
     console.log(`[QR] Cargando clases para día ${dayNum}...`);
-    const endpoint = getApiBase() + `api/qr/get_clases_dia.php?dia=${dayNum}`;
+    const endpoint = getApiBase() + `api/horarios/clases-por-dia?dia=${dayNum}`;
     const result = await api(endpoint, 'GET');
     console.log(`[QR] Clases cargadas:`, result);
     if (result.success) {

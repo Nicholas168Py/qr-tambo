@@ -63,7 +63,7 @@ async function registerAttendance() {
         <p style="color:var(--text-secondary);margin-top:8px;">Por favor espera...</p>`;
 
     try {
-        const result = await api('api/asistencia/registrar.php', 'POST', { token: QR_TOKEN });
+        const result = await api('api/asistencia/registrar', 'POST', { token: QR_TOKEN });
         console.log('[REGISTRO] API response:', JSON.stringify(result).substring(0, 300));
 
         if (result.success) {
@@ -119,7 +119,7 @@ if (loginForm) {
         btn.disabled = true;
         btn.textContent = 'Ingresando...';
 
-        const result = await api('api/auth/login.php', 'POST', { cedula, password });
+        const result = await api('api/auth/login', 'POST', { cedula, password });
         console.log('[REGISTRO] Login result:', JSON.stringify(result).substring(0, 200));
 
         if (result.success) {

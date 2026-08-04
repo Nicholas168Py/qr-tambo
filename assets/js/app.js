@@ -167,7 +167,7 @@ async function logout() {
     if (window.location.pathname.includes('/admin/') || window.location.pathname.includes('/bailarin/')) {
         basePath = '../';
     }
-    await api(basePath + 'api/auth/logout.php', 'POST');
+    await api(basePath + 'api/auth/logout', 'POST');
     window.location.href = basePath + 'index.php';
 }
 

@@ -208,10 +208,10 @@ function switchSection(sectionId, btn) {
 async function loadResumen() {
     console.log('[ADMIN] loadResumen()');
     const [c, h, u, a] = await Promise.all([
-        api('../api/clases/list.php'),
-        api('../api/horarios/list.php'),
-        api('../api/usuarios/list.php'),
-        api('../api/asistencia/list.php?mes=' + (new Date().getMonth() + 1) + '&anio=' + new Date().getFullYear())
+        api('../api/clases'),
+        api('../api/horarios'),
+        api('../api/usuarios'),
+        api('../api/asistencia?mes=' + (new Date().getMonth() + 1) + '&anio=' + new Date().getFullYear())
     ]);
     document.getElementById('totalClases').textContent = c.success ? c.data.length : '-';
     document.getElementById('totalHorarios').textContent = h.success ? h.data.length : '-';
@@ -222,7 +222,7 @@ async function loadResumen() {
 // Clases CRUD
 async function loadClases() {
     console.log('[ADMIN] loadClases()');
-    const result = await api('../api/clases/list.php');
+    const result = await api('../api/clases');
     const container = document.getElementById('clasesList');
     if (!result.success || result.data.length === 0) {
         container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-music"></i></span><p>No hay clases registradas</p></div>';
@@ -243,7 +243,7 @@ async function createClase() {
     const desc = document.getElementById('claseDesc').value.trim();
     if (!nombre) return showToast('Ingresa un nombre para la clase', 'warning');
     console.log('[ADMIN] createClase:', nombre);
-    const result = await api('../api/clases/create.php', 'POST', { nombre, descripcion: desc });
+    const result = await api('../api/clases', 'POST', { nombre, descripcion: desc });
     if (result.success) {
         showToast(result.message, 'success');
         document.getElementById('claseNombre').value = '';
@@ -257,7 +257,7 @@ async function createClase() {
 async function deleteClase(id, nombre) {
     if (!confirm(`¿Eliminar la clase "${nombre}"? También se eliminarán sus horarios.`)) return;
     console.log('[ADMIN] deleteClase:', id, nombre);
-    const result = await api('../api/clases/delete.php', 'POST', { id });
+    const result = await api('../api/clases/' + id, 'DELETE');
     if (result.success) { showToast(result.message, 'success'); loadClases(); }
     else showToast(result.message, 'error');
 }
@@ -281,7 +281,7 @@ function switchAdminDay(el, idx) {
 
 async function loadHorarios() {
     console.log('[ADMIN] loadHorarios()');
-    const result = await api('../api/horarios/list.php');
+    const result = await api('../api/horarios');
     if (!result.success || !result.data.length) {
         document.getElementById('horariosList').innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-calendar-alt"></i></span><p>No hay horarios configurados. Agregá uno arriba.</p></div>';
         return;
@@ -372,7 +372,7 @@ function renderAdminTimeline() {
 
 async function loadClasesSelect() {
     console.log('[ADMIN] loadClasesSelect()');
-    const result = await api('../api/clases/list.php');
+    const result = await api('../api/clases');
     const select = document.getElementById('horarioClase');
     if (result.success) {
         select.innerHTML = '<option value="">Seleccionar clase...</option>' +
@@ -387,7 +387,7 @@ async function createHorario() {
     const hora_fin = document.getElementById('horarioFin').value;
     if (!clase_id || !hora_inicio || !hora_fin) return showToast('Completa todos los campos', 'warning');
     console.log('[ADMIN] createHorario:', { clase_id, dia_semana, hora_inicio, hora_fin });
-    const result = await api('../api/horarios/create.php', 'POST', { clase_id, dia_semana, hora_inicio, hora_fin });
+    const result = await api('../api/horarios', 'POST', { clase_id, dia_semana, hora_inicio, hora_fin });
     if (result.success) {
         showToast(result.message, 'success');
         document.getElementById('horarioInicio').value = '';
@@ -399,7 +399,7 @@ async function createHorario() {
 async function deleteHorario(id, nombre) {
     if (!confirm(`¿Eliminar "${nombre}" de este horario?`)) return;
     console.log('[ADMIN] deleteHorario:', id, nombre);
-    const result = await api('../api/horarios/delete.php', 'POST', { id });
+    const result = await api('../api/horarios/' + id, 'DELETE');
     if (result.success) { showToast(result.message, 'success'); loadHorarios(); }
     else showToast(result.message, 'error');
 }
@@ -415,7 +415,7 @@ async function loadAsistencia() {
     if (cedula) params.set('cedula', cedula);
     if (clase) params.set('clase', clase);
 
-    const result = await api(`../api/asistencia/list.php?${params.toString()}`);
+    const result = await api(`../api/asistencia?${params.toString()}`);
     const container = document.getElementById('asistenciaList');
 
     if (!result.success || result.data.length === 0) {
@@ -446,7 +446,7 @@ async function loadReporte() {
     let anio = document.getElementById('reporteAnio').value;
     if (!anio) anio = new Date().getFullYear();
 
-    const result = await api(`../api/asistencia/reporte_mensual.php?mes=${mes}&anio=${anio}`);
+    const result = await api(`../api/asistencia/reporte-mensual?mes=${mes}&anio=${anio}`);
     const container = document.getElementById('reporteContent');
     if (!result.success) {
         container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-chart-line"></i></span><p>Error al cargar reporte</p></div>';
@@ -484,7 +484,7 @@ async function loadReporte() {
 // Bailarines
 async function loadBailarines() {
     console.log('[ADMIN] loadBailarines()');
-    const result = await api('../api/usuarios/list.php');
+    const result = await api('../api/usuarios');
     const container = document.getElementById('bailarinesList');
     const totalEl = document.getElementById('totalBailarinesCount');
 
@@ -514,7 +514,7 @@ async function loadBailarines() {
 async function deleteBailarin(id, nombre) {
     if (!confirm(`¿Eliminar la cuenta de "${nombre}"?\n\nSe eliminará permanentemente.`)) return;
     console.log('[ADMIN] deleteBailarin:', id, nombre);
-    const result = await api('../api/usuarios/delete.php', 'POST', { id });
+    const result = await api('../api/usuarios/' + id, 'DELETE');
     if (result.success) {
         showToast(result.message, 'success');
         loadBailarines();

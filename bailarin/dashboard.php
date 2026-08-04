@@ -42,7 +42,7 @@ console.log('[BAILARIN] Dashboard cargado');
 async function loadHistory() {
     console.log('[BAILARIN] Cargando historial...');
     const dateFilter = document.getElementById('filterDate').value;
-    let endpoint = '../api/asistencia/list.php';
+    let endpoint = '../api/asistencia';
     if (dateFilter) {
         const d = new Date(dateFilter);
         endpoint += `?mes=${d.getMonth() + 1}&anio=${d.getFullYear()}`;

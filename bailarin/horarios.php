@@ -56,7 +56,7 @@ async function loadDay(day) {
     const container = document.getElementById('scheduleContainer');
     container.innerHTML = '<div style="text-align:center;padding:40px;"><div class="spinner" style="margin:0 auto;"></div></div>';
 
-    const result = await api('../api/horarios/list.php');
+    const result = await api('../api/horarios');
     if (!result.success || !result.data.length) {
         container.innerHTML = '<div class="empty-state" style="padding:40px 16px;"><span class="empty-icon"><i class="fas fa-calendar-alt"></i></span><p>No hay horarios disponibles</p></div>';
         return;

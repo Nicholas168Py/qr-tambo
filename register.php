@@ -104,7 +104,7 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     btn.disabled = true;
     btn.textContent = 'Registrando...';
 
-    const result = await api('api/auth/register.php', 'POST', { nombre, cedula, password });
+    const result = await api('api/auth/register', 'POST', { nombre, cedula, password });
     console.log('[REGISTER] Resultado:', JSON.stringify(result).substring(0, 300));
 
     if (result.success) {
