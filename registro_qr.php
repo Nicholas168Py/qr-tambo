@@ -49,6 +49,8 @@ $loggedIn = isLoggedIn();
     </div>
 </div>
 
+<?php include 'includes/footer.php'; ?>
+
 <script>
 console.log('[REGISTRO] Página cargada, token:', <?= json_encode($token) ?>.substring(0, 50), 'loggedIn:', <?= $loggedIn ? 'true' : 'false' ?>);
 const QR_TOKEN = <?= json_encode($token) ?>;
@@ -146,5 +148,3 @@ if (IS_LOGGED_IN && QR_TOKEN) {
     console.log('[REGISTRO] Esperando login del usuario');
 }
 </script>
-
-<?php include 'includes/footer.php'; ?>

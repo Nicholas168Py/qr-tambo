@@ -122,16 +122,20 @@ include '../includes/header.php';
         <div class="section" id="section-asistencia">
             <div class="glass-card filter-bar">
                 <div class="form-group">
+                    <select id="filtroBailarin" class="form-input">
+                        <option value="">Todos los bailarines</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <select id="filtroClase" class="form-input">
+                        <option value="">Todas las clases</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <input type="date" id="filtroFecha" class="form-input">
                 </div>
-                <div class="form-group">
-                    <input type="text" id="filtroCedula" class="form-input" placeholder="Filtrar por cédula...">
-                </div>
-                <div class="form-group">
-                    <input type="text" id="filtroClase" class="form-input" placeholder="Filtrar por clase...">
-                </div>
                 <button class="btn btn-primary" onclick="loadAsistencia()"><i class="fas fa-search"></i> Filtrar</button>
-                <button class="btn btn-secondary" onclick="resetFiltros()">Limpiar</button>
+                <button class="btn btn-secondary" onclick="resetFiltros()"><i class="fas fa-eraser"></i> Limpiar</button>
             </div>
             <div id="asistenciaList"><div class="empty-state"><span class="empty-icon"><i class="fas fa-check-circle"></i></span>Cargando asistencias...</div></div>
         </div>
@@ -197,7 +201,7 @@ function switchSection(sectionId, btn) {
     if (sectionId === 'resumen') loadResumen();
     if (sectionId === 'clases') loadClases();
     if (sectionId === 'horarios') { loadClasesSelect(); loadHorarios(); }
-    if (sectionId === 'asistencia') loadAsistencia();
+    if (sectionId === 'asistencia') { populateAsistenciaFilters(); loadAsistencia(); }
     if (sectionId === 'reportes') loadReporte();
     if (sectionId === 'bailarines') loadBailarines();
 
@@ -405,13 +409,41 @@ async function deleteHorario(id, nombre) {
 }
 
 // Asistencia
+let lastAsistenciaData = null;
+
+function isMobileView() {
+    return window.innerWidth <= 768;
+}
+
+async function populateAsistenciaFilters() {
+    console.log('[ADMIN] populateAsistenciaFilters()');
+    const [bailarines, clases] = await Promise.all([
+        api('../api/usuarios/list.php'),
+        api('../api/clases/list.php')
+    ]);
+    const bailarinSelect = document.getElementById('filtroBailarin');
+    const claseSelect = document.getElementById('filtroClase');
+    if (bailarines.success && bailarines.data.length) {
+        const prev = bailarinSelect.value;
+        bailarinSelect.innerHTML = '<option value="">Todos los bailarines</option>' +
+            bailarines.data.map(u => `<option value="${u.cedula}">${u.nombre}</option>`).join('');
+        bailarinSelect.value = prev;
+    }
+    if (clases.success && clases.data.length) {
+        const prev = claseSelect.value;
+        claseSelect.innerHTML = '<option value="">Todas las clases</option>' +
+            clases.data.map(c => `<option value="${c.nombre}">${c.nombre}</option>`).join('');
+        claseSelect.value = prev;
+    }
+}
+
 async function loadAsistencia() {
     console.log('[ADMIN] loadAsistencia()');
     const params = new URLSearchParams();
     const fecha = document.getElementById('filtroFecha').value;
-    const cedula = document.getElementById('filtroCedula').value.trim();
-    const clase = document.getElementById('filtroClase').value.trim();
-    if (fecha) { params.set('mes', new Date(fecha).getMonth() + 1); params.set('anio', new Date(fecha).getFullYear()); }
+    const cedula = document.getElementById('filtroBailarin').value;
+    const clase = document.getElementById('filtroClase').value;
+    if (fecha) params.set('fecha', fecha);
     if (cedula) params.set('cedula', cedula);
     if (clase) params.set('clase', clase);
 
@@ -419,22 +451,64 @@ async function loadAsistencia() {
     const container = document.getElementById('asistenciaList');
 
     if (!result.success || result.data.length === 0) {
+        lastAsistenciaData = null;
         container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-check-circle"></i></span><p>No se encontraron registros de asistencia</p></div>';
         return;
     }
-    container.innerHTML = `<div class="table-container"><table>
+    lastAsistenciaData = result.data;
+    renderAsistencia();
+}
+
+function renderAsistencia() {
+    if (!lastAsistenciaData) return;
+    const container = document.getElementById('asistenciaList');
+    container.innerHTML = window.innerWidth <= 768
+        ? renderAsistenciaCards(lastAsistenciaData)
+        : renderAsistenciaTable(lastAsistenciaData);
+}
+
+function renderAsistenciaTable(data) {
+    return `<div class="table-container"><table>
         <thead><tr><th>#</th><th>Cédula</th><th>Nombre</th><th>Clase</th><th>Fecha</th><th>Hora</th></tr></thead>
-        <tbody>${result.data.map((r, i) => `<tr>
+        <tbody>${data.map((r, i) => `<tr>
             <td>${i + 1}</td><td>${r.cedula}</td><td>${r.nombre}</td>
             <td>${r.clase}</td><td>${formatDate(r.fecha)}</td><td>${formatTime(r.hora_registro)}</td>
         </tr>`).join('')}</tbody>
     </table></div>`;
 }
 
+function renderAsistenciaCards(data) {
+    return `<div class="data-card-list">${data.map((r, i) => `
+        <div class="data-card" style="animation-delay:${Math.min(i * 0.04, 0.5)}s;">
+            <div class="data-card-head">
+                <div class="data-avatar">${((r.nombre || 'U').trim() || 'U').charAt(0).toUpperCase()}</div>
+                <div class="data-head-info">
+                    <div class="data-title">${r.nombre}</div>
+                    <div class="data-subtitle"><i class="fas fa-id-card"></i> ${r.cedula}</div>
+                </div>
+                <span class="data-chip chip-success"><i class="fas fa-check-circle"></i> Presente</span>
+            </div>
+            <div class="data-grid">
+                <div class="data-item">
+                    <div class="data-label"><i class="fas fa-music"></i> Clase</div>
+                    <div class="data-value">${r.clase}</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label"><i class="fas fa-calendar-day"></i> Fecha</div>
+                    <div class="data-value">${formatDate(r.fecha)}</div>
+                </div>
+                <div class="data-item">
+                    <div class="data-label"><i class="far fa-clock"></i> Hora</div>
+                    <div class="data-value">${formatTime(r.hora_registro)}</div>
+                </div>
+            </div>
+        </div>`).join('')}</div>`;
+}
+
 function resetFiltros() {
     console.log('[ADMIN] resetFiltros()');
     document.getElementById('filtroFecha').value = '';
-    document.getElementById('filtroCedula').value = '';
+    document.getElementById('filtroBailarin').value = '';
     document.getElementById('filtroClase').value = '';
     loadAsistencia();
 }
@@ -482,6 +556,8 @@ async function loadReporte() {
 }
 
 // Bailarines
+let lastBailarinesData = null;
+
 async function loadBailarines() {
     console.log('[ADMIN] loadBailarines()');
     const result = await api('../api/usuarios/list.php');
@@ -489,16 +565,29 @@ async function loadBailarines() {
     const totalEl = document.getElementById('totalBailarinesCount');
 
     if (!result.success || result.data.length === 0) {
+        lastBailarinesData = null;
         container.innerHTML = '<div class="empty-state"><span class="empty-icon"><i class="fas fa-users"></i></span><p>No hay bailarines registrados</p></div>';
         if (totalEl) totalEl.textContent = '0 bailarines';
         return;
     }
 
     if (totalEl) totalEl.textContent = `${result.total} bailarín${result.total !== 1 ? 'es' : ''}`;
+    lastBailarinesData = result.data;
+    renderBailarines();
+}
 
-    container.innerHTML = `<div class="table-container"><table>
+function renderBailarines() {
+    if (!lastBailarinesData) return;
+    const container = document.getElementById('bailarinesList');
+    container.innerHTML = window.innerWidth <= 768
+        ? renderBailarinesCards(lastBailarinesData)
+        : renderBailarinesTable(lastBailarinesData);
+}
+
+function renderBailarinesTable(data) {
+    return `<div class="table-container"><table>
         <thead><tr><th>#</th><th>Cédula</th><th>Nombre</th><th>Registrado</th><th>Acción</th></tr></thead>
-        <tbody>${result.data.map((u, i) => {
+        <tbody>${data.map((u, i) => {
             const date = u.created_at ? formatDate(u.created_at.split(' ')[0]) : '-';
             return `<tr>
                 <td>${i + 1}</td>
@@ -509,6 +598,31 @@ async function loadBailarines() {
             </tr>`;
         }).join('')}</tbody>
     </table></div>`;
+}
+
+function renderBailarinesCards(data) {
+    return `<div class="data-card-list">${data.map((u, i) => {
+        const date = u.created_at ? formatDate(u.created_at.split(' ')[0]) : '-';
+        return `<div class="data-card" style="animation-delay:${Math.min(i * 0.04, 0.5)}s;">
+            <div class="data-card-head">
+                <div class="data-avatar">${((u.nombre || 'U').trim() || 'U').charAt(0).toUpperCase()}</div>
+                <div class="data-head-info">
+                    <div class="data-title">${u.nombre}</div>
+                    <div class="data-subtitle"><i class="fas fa-id-card"></i> ${u.cedula}</div>
+                </div>
+                <span class="data-chip chip-bailarin"><i class="fas fa-user"></i> Bailarín</span>
+            </div>
+            <div class="data-grid">
+                <div class="data-item">
+                    <div class="data-label"><i class="fas fa-calendar-check"></i> Registrado</div>
+                    <div class="data-value">${date}</div>
+                </div>
+            </div>
+            <div class="data-actions">
+                <button class="btn btn-danger btn-sm" onclick="deleteBailarin(${u.id}, '${u.nombre.replace(/'/g, "\\'")}')"><i class="fas fa-trash"></i> Eliminar</button>
+            </div>
+        </div>`;
+    }).join('')}</div>`;
 }
 
 async function deleteBailarin(id, nombre) {
@@ -538,6 +652,18 @@ window.addEventListener('resize', function() {
         if (active) {
             const idx = Array.from(slider.querySelectorAll('.day-slider-btn')).indexOf(active);
             document.getElementById('adminDayIndicator').style.transform = `translateX(${idx * step}px)`;
+        }
+    }, 150);
+});
+
+// Re-render tablas/tarjetas al cruzar el breakpoint móvil
+let adminDataResizeTimer;
+window.addEventListener('resize', function() {
+    clearTimeout(adminDataResizeTimer);
+    adminDataResizeTimer = setTimeout(function() {
+        if (lastAsistenciaData || lastBailarinesData) {
+            renderAsistencia();
+            renderBailarines();
         }
     }, 150);
 });

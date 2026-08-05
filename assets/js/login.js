@@ -168,6 +168,8 @@
         var svg = document.getElementById('wavesLayer');
         if (!svg) return;
 
+        var WAVE_SPEED = 6;
+
         var NS = 'http://www.w3.org/2000/svg';
         var W = 0, H = 0;
         var path1 = document.createElementNS(NS, 'path');
@@ -205,8 +207,8 @@
 
         function step() {
             t += 0.018;
-            path1.setAttribute('d', buildPath(0, 1, 0.02));
-            path2.setAttribute('d', buildPath(Math.PI * 0.6, 0.6, 0.03));
+            path1.setAttribute('d', buildPath(0, 1, 0.02 * WAVE_SPEED));
+            path2.setAttribute('d', buildPath(Math.PI * 0.6, 0.6, 0.03 * WAVE_SPEED));
             rafId = requestAnimationFrame(step);
         }
 

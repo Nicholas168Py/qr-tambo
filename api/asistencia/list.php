@@ -12,6 +12,7 @@ $mes = isset($_GET['mes']) ? intval($_GET['mes']) : 0;
 $anio = isset($_GET['anio']) ? intval($_GET['anio']) : 0;
 $cedula = isset($_GET['cedula']) ? sanitize($_GET['cedula']) : '';
 $clase = isset($_GET['clase']) ? sanitize($_GET['clase']) : '';
+$fecha = isset($_GET['fecha']) ? sanitize($_GET['fecha']) : '';
 
 try {
     $db = Database::getInstance()->getConnection();
@@ -44,6 +45,14 @@ try {
     if ($anio > 0) {
         $sql .= " AND YEAR(fecha) = ?";
         $params[] = $anio;
+    }
+
+    if (!empty($fecha) && strpos($fecha, ' ') === false) {
+        $fechaObj = DateTime::createFromFormat('Y-m-d', $fecha);
+        if ($fechaObj && $fechaObj->format('Y-m-d') === $fecha) {
+            $sql .= " AND fecha = ?";
+            $params[] = $fecha;
+        }
     }
 
     $sql .= " ORDER BY fecha DESC, hora_registro DESC LIMIT 500";
