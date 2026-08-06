@@ -1,15 +1,23 @@
 # Credenciales de base de datos
-config/config.php
+backend/config/config.php
 
 # Sesiones de PHP
 sessions/
+backend/sessions/
+
+# Logs
+backend/logs/
+*.log
 
 # Sistema operativo
 Thumbs.db
 .DS_Store
-*.log
 
 # IDE
 .vscode/
 .idea/
 *.sublime-project
+
+# Frontend React (Vite)
+frontend/node_modules/
+frontend/dist/

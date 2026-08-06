@@ -1,0 +1,71 @@
+<?php
+/**
+ * QR Tambo - Controlador Auth
+ * Recibe las peticiones de autenticación, delega en el servicio y
+ * construye las respuestas HTTP. No contiene lógica de negocio.
+ */
+
+namespace Controllers;
+
+use Services\AuthService;
+use Support\ApiException;
+use Support\Auth;
+use Support\Http;
+
+final class AuthController extends ApiController {
+    private AuthService $service;
+
+    public function __construct() {
+        $this->service = new AuthService();
+    }
+
+    public function login(): void {
+        $data = Http::getRequestBody();
+        $cedula = Http::sanitize($data['cedula'] ?? '');
+        $password = $data['password'] ?? '';
+
+        if ($cedula === '' || $password === '') {
+            throw new ApiException('Cédula y contraseña son requeridos', 400);
+        }
+
+        $this->handle(function () use ($cedula, $password) {
+            $user = $this->service->login($cedula, $password);
+            Auth::login($user);
+
+            return [
+                'nombre' => $user['nombre'],
+                'cedula' => $user['cedula'],
+                'rol' => $user['rol']
+            ];
+        }, 200, 'Inicio de sesión exitoso');
+    }
+
+    public function register(): void {
+        $data = Http::getRequestBody();
+        $nombre = Http::sanitize($data['nombre'] ?? '');
+        $cedula = Http::sanitize($data['cedula'] ?? '');
+        $password = $data['password'] ?? '';
+
+        if ($nombre === '' || $cedula === '' || $password === '') {
+            throw new ApiException('Todos los campos son requeridos', 400);
+        }
+
+        $this->handle(function () use ($nombre, $cedula, $password) {
+            $this->service->register($nombre, $cedula, $password);
+            return null;
+        }, 201, 'Registro exitoso. Ya puedes iniciar sesión.');
+    }
+
+    public function logout(): void {
+        Auth::logout();
+        $this->handleRaw(fn () => ['success' => true, 'message' => 'Sesión cerrada']);
+    }
+
+    public function me(): void {
+        Auth::requireLogin();
+        $this->handleRaw(fn () => [
+            'success' => true,
+            'data' => Auth::currentUser()
+        ]);
+    }
+}

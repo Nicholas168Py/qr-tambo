@@ -1,0 +1,41 @@
+/* React-specific helper styles for QR Tambo */
+
+.spin {
+  animation: spin 0.8s linear infinite;
+}
+
+/* Ensure lucide icons align nicely inside buttons */
+.btn,
+.login-btn {
+  line-height: 1;
+}
+
+.btn svg,
+.login-btn svg {
+  flex-shrink: 0;
+}
+
+/* App shell: main content inside admin layout needs bottom padding for nav */
+.admin-layout .main-content {
+  position: relative;
+}
+
+/* Buttons used as nav links in bottom nav */
+button.nav-item {
+  font-family: var(--font-body);
+}
+
+/* Fix sidebar link reset for buttons inside sidebar footer */
+.sidebar-footer button.nav-link {
+  justify-content: flex-start;
+  border-top: 1px solid var(--glass-border);
+  padding-top: 12px;
+}
+
+/* Filter bar selects/inputs responsive */
+.filter-bar .form-input,
+.add-form .form-input {
+  min-width: 0;
+}
+
+/* Modal transition uses .active class; React keeps classNames aligned */

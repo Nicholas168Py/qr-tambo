@@ -1,0 +1,8 @@
+# QR Tambo - SPA fallback (React Router)
+# Rewrites all non-file/non-directory requests to index.html
+RewriteEngine On
+RewriteBase /qr_tambo/frontend/dist/
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /qr_tambo/frontend/dist/index.html [L]
