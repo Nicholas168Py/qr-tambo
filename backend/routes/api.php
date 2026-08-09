@@ -18,6 +18,7 @@ return [
     ['POST', '/auth/logout', [AuthController::class, 'logout']],
     ['GET', '/auth/me', [AuthController::class, 'me']],
     ['POST', '/auth/cambiar-password', [UsuarioController::class, 'changePassword']],
+    ['POST', '/auth/cambiar-credenciales', [UsuarioController::class, 'changeCredentials']],
 
     // Clases
     ['GET', '/clases', [ClaseController::class, 'index']],

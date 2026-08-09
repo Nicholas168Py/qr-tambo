@@ -63,6 +63,19 @@ try {
         $results[] = ['step' => 'Crear usuario admin', 'status' => 'Ya existía (OK)', 'ok' => true];
     }
 
+    // Create second default admin user
+    $admin2Password = password_hash('admin123', PASSWORD_DEFAULT);
+    $stmt2 = $pdo->prepare(
+        "INSERT IGNORE INTO usuarios (cedula, nombre, password_hash, rol) VALUES (?, ?, ?, 'admin')"
+    );
+    $stmt2->execute(['admin2', 'Administrador 2', $admin2Password]);
+
+    if ($stmt2->rowCount() > 0) {
+        $results[] = ['step' => 'Crear usuario admin 2', 'status' => 'Creado (cédula: admin2, contraseña: admin123)', 'ok' => true];
+    } else {
+        $results[] = ['step' => 'Crear usuario admin 2', 'status' => 'Ya existía (OK)', 'ok' => true];
+    }
+
 } catch (Exception $e) {
     $results[] = ['step' => 'Error general', 'status' => $e->getMessage(), 'ok' => false];
     $success = false;
@@ -165,8 +178,8 @@ try {
 
         <div class="info-box">
             <h3><i class="fas fa-lock"></i> Credenciales del Administrador</h3>
-            <p>Cédula: <code>admin</code></p>
-            <p>Contraseña: <code>admin123</code></p>
+            <p>Cédula: <code>admin</code> — Contraseña: <code>admin123</code></p>
+            <p>Cédula: <code>admin2</code> — Contraseña: <code>admin123</code></p>
             <br>
             <a href="../frontend/index.php" class="btn">Ir al Login →</a>
         </div>

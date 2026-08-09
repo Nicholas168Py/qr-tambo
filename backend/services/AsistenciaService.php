@@ -8,6 +8,8 @@
 namespace Services;
 
 use Models\Asistencia;
+use Models\Clase;
+use Models\Horario;
 use Support\ApiException;
 use Support\Date;
 
@@ -31,6 +33,7 @@ final class AsistenciaService {
         $fecha = $decoded['f'];
 
         $this->assertValidDate($fecha);
+        $this->assertValidClassSchedule($decoded, $fecha);
 
         if (Asistencia::exists($user['cedula'], $clase, $fecha)) {
             throw new ApiException('Ya registraste tu asistencia a esta clase hoy', 409);
@@ -99,7 +102,59 @@ final class AsistenciaService {
         $yesterday = date('Y-m-d', strtotime('-1 day'));
 
         if ($fecha !== $today && $fecha !== $yesterday) {
-            throw new ApiException('Este código QR ha expirado. Solo es válido para el día de la clase.', 400);
+            throw new ApiException('Este código QR no es válido para la fecha actual.', 400);
+        }
+    }
+
+    /**
+     * Verifica que la clase del QR exista y esté realmente programada
+     * para el día de la fecha indicada. Evita registrar asistencia con
+     * un QR forjado o con parámetros manipulados (otra clase, otro día
+     * o una clase inexistente).
+     */
+    private function assertValidClassSchedule(array $decoded, string $fecha): void {
+        $diaSemana = (int) date('N', strtotime($fecha));
+        $clase = trim($decoded['c'] ?? '');
+        $hora = isset($decoded['h']) ? $decoded['h'] : null;
+        $horarioId = isset($decoded['i']) ? (int) $decoded['i'] : 0;
+
+        if ($horarioId > 0) {
+            $horario = Horario::findById($horarioId);
+
+            if (!$horario) {
+                throw new ApiException('Este código QR no corresponde a una clase válida', 400);
+            }
+
+            if ((int) $horario['dia_semana'] !== $diaSemana) {
+                throw new ApiException('Este código QR no corresponde a la fecha indicada', 400);
+            }
+
+            if ($hora !== null && $hora !== '' && $horario['hora_inicio'] !== $hora) {
+                throw new ApiException('Este código QR no corresponde al horario de la clase', 400);
+            }
+
+            return;
+        }
+
+        $existing = Clase::findByName($clase);
+
+        if (!$existing) {
+            throw new ApiException('Este código QR no corresponde a una clase válida', 400);
+        }
+
+        $horarios = Horario::findByClaseAndDay((int) $existing['id'], $diaSemana);
+
+        if (empty($horarios)) {
+            throw new ApiException('Este código QR no corresponde a una clase programada para la fecha indicada', 400);
+        }
+
+        if ($hora !== null && $hora !== '') {
+            foreach ($horarios as $item) {
+                if ($item['hora_inicio'] === $hora) {
+                    return;
+                }
+            }
+            throw new ApiException('Este código QR no corresponde al horario de la clase', 400);
         }
     }
 }

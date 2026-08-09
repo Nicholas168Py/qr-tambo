@@ -85,6 +85,49 @@ final class UsuarioService {
         Usuario::updatePassword($userId, password_hash($newPassword, PASSWORD_DEFAULT));
     }
 
+    public function updateCredentials(int $userId, string $currentPassword, string $newCedula, string $newPassword, string $confirmPassword): array {
+        $user = Usuario::findById($userId);
+
+        if (!$user) {
+            throw new ApiException('Usuario no encontrado', 404);
+        }
+
+        $this->verifyCurrentPassword($user['password_hash'], $currentPassword);
+
+        if ($newPassword !== '') {
+            if ($newPassword !== $confirmPassword) {
+                throw new ApiException('Las contraseñas nuevas no coinciden', 400);
+            }
+
+            if (strlen($newPassword) < 6) {
+                throw new ApiException('La contraseña debe tener al menos 6 caracteres', 400);
+            }
+
+            Usuario::updatePassword($userId, password_hash($newPassword, PASSWORD_DEFAULT));
+        }
+
+        if ($newCedula !== '') {
+            if ($newCedula === $user['cedula']) {
+                throw new ApiException('El nuevo usuario debe ser diferente al actual', 400);
+            }
+
+            if (Usuario::existsByCedula($newCedula)) {
+                throw new ApiException('Este usuario ya está en uso', 409);
+            }
+
+            Usuario::updateCedula($userId, $newCedula);
+        }
+
+        $updated = Usuario::findById($userId);
+
+        return [
+            'id' => $updated['id'],
+            'cedula' => $updated['cedula'],
+            'nombre' => $updated['nombre'],
+            'rol' => $updated['rol']
+        ];
+    }
+
     private function verifyCurrentPassword(string $storedHash, string $currentPassword): void {
         $isPlainTextMatch = password_needs_rehash($storedHash, PASSWORD_DEFAULT) && $currentPassword === $storedHash;
         $isHashMatch = password_verify($currentPassword, $storedHash);

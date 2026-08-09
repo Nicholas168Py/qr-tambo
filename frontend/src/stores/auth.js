@@ -22,4 +22,8 @@ export const useAuth = create((set, get) => ({
     await api('auth/logout', 'POST');
     set({ user: null });
   },
+
+  async updateUser(data) {
+    set({ user: { ...get().user, ...data } });
+  },
 }));

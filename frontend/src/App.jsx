@@ -18,6 +18,7 @@ import AdminHorarios from './pages/admin/Horarios';
 import AdminAsistencia from './pages/admin/Asistencia';
 import AdminReportes from './pages/admin/Reportes';
 import AdminBailarines from './pages/admin/Bailarines';
+import AdminConfiguracion from './pages/admin/Configuracion';
 import QrDia from './pages/admin/QrDia';
 
 import BailarinDashboard from './pages/bailarin/BailarinDashboard';
@@ -25,18 +26,25 @@ import Escanear from './pages/bailarin/Escanear';
 import BailarinHorarios from './pages/bailarin/Horarios';
 import Perfil from './pages/bailarin/Perfil';
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: Infinity,
+      gcTime: 60 * 60 * 1000,
+      retry: 1,
+      refetchOnMount: false,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+    },
+  },
+});
+
 export default function App() {
   const init = useAuth((s) => s.init);
 
   useEffect(() => {
     init();
   }, [init]);
-
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false },
-    },
-  });
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -58,6 +66,7 @@ export default function App() {
           <Route path="reportes" element={<AdminReportes />} />
           <Route path="bailarines" element={<AdminBailarines />} />
           <Route path="qr-dia" element={<QrDia />} />
+          <Route path="configuracion" element={<AdminConfiguracion />} />
         </Route>
 
         <Route

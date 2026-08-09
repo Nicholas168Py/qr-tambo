@@ -49,6 +49,12 @@ final class Horario {
         return $horario ?: null;
     }
 
+    public static function findByClaseAndDay(int $claseId, int $diaSemana): array {
+        $stmt = self::db()->prepare(self::SELECT_SQL . " WHERE h.clase_id = ? AND h.dia_semana = ?");
+        $stmt->execute([$claseId, $diaSemana]);
+        return $stmt->fetchAll() ?: [];
+    }
+
     public static function update(int $id, int $claseId, int $diaSemana, string $horaInicio, string $horaFin): bool {
         $stmt = self::db()->prepare(
             "UPDATE horarios SET clase_id = ?, dia_semana = ?, hora_inicio = ?, hora_fin = ? WHERE id = ?"

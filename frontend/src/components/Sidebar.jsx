@@ -2,7 +2,7 @@
 import { useAuth } from '../stores/auth';
 import { useToast } from '../stores/toast';
 import {
-  LayoutDashboard, Music, CalendarDays, CheckCircle2, BarChart3, Users, QrCode, LogOut,
+  LayoutDashboard, Music, CalendarDays, CheckCircle2, BarChart3, Users, QrCode, Settings, LogOut,
 } from 'lucide-react';
 import { LOGO } from '../lib/assets';
 
@@ -13,7 +13,8 @@ const LINKS = [
   { to: '/admin/asistencia', icon: CheckCircle2, label: 'Asistencia' },
   { to: '/admin/reportes', icon: BarChart3, label: 'Reportes' },
   { to: '/admin/bailarines', icon: Users, label: 'Bailarines' },
-  { to: '/admin/qr-dia', icon: QrCode, label: 'QR del DÃ­a' },
+  { to: '/admin/qr-dia', icon: QrCode, label: 'QR del Día' },
+  { to: '/admin/configuracion', icon: Settings, label: 'Configuración' },
 ];
 
 export default function Sidebar({ open, onClose }) {
