@@ -55,7 +55,7 @@ export default function RegistroQr() {
     setSubmitting(false);
     if (res.success) {
       toast.success('¡Bienvenido!');
-      setTimeout(registerAttendance, 800);
+      // El useEffect ([token, user]) dispara registerAttendance() al actualizarse el usuario.
     } else {
       toast.error(res.message || 'Error al iniciar sesión');
     }

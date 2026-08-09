@@ -9,7 +9,7 @@ export default function Asistencia() {
   const [fecha, setFecha] = useState(getTodayStr());
   const [cedula, setCedula] = useState('');
   const [clase, setClase] = useState('');
-  const [applied, setApplied] = useState({});
+  const [applied, setApplied] = useState(null);
 
   function buildParams() {
     const p = new URLSearchParams();
@@ -20,9 +20,10 @@ export default function Asistencia() {
     return p.toString();
   }
 
-  const { data, isLoading, refetch, isFetching } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['asistencia-admin', applied],
     queryFn: () => api(`asistencia${buildParams() ? `?${buildParams()}` : ''}`),
+    enabled: applied !== null,
   });
 
   const rows = data?.data || [];
@@ -44,7 +45,7 @@ export default function Asistencia() {
     setFecha('');
     setCedula('');
     setClase('');
-    setApplied({});
+    setApplied(null);
   }
 
   return (
@@ -71,7 +72,9 @@ export default function Asistencia() {
         <button className="btn btn-secondary" type="button" onClick={handleClear}><X size={18} /> Limpiar</button>
       </form>
 
-      {isLoading || isFetching ? (
+      {applied === null ? (
+        <EmptyState icon={Search} message="Usa los filtros y pulsa «Filtrar» para consultar asistencias" />
+      ) : isLoading || isFetching ? (
         <div className="empty-state"><Loader2 size={40} className="spin" /></div>
       ) : rows.length === 0 ? (
         <EmptyState icon={CheckCircle2} message="No hay registros de asistencia" />

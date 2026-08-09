@@ -67,7 +67,7 @@ Endpoints disponibles:
 2. Configurá las credenciales de MySQL en `backend/config/config.php` (o copiá desde `backend/config/config.example.php`).
 3. Iniciá Apache y MySQL.
 4. Ejecutá en el navegador: `http://localhost/qr_tambo/backend/setup.php`
-   - Crea las tablas y un usuario admin por defecto (cédula: `admin`, contraseña: `admin123`).
+   - Crea las tablas y usuarios admin por defecto (cédula: `admin`, contraseña: `admin123`; cédula: `admin2`, contraseña: `admin123`).
 5. Frontend React:
 
    ```bash

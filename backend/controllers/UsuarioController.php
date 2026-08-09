@@ -78,4 +78,34 @@ final class UsuarioController extends ApiController {
             return null;
         }, 200, 'Contraseña actualizada correctamente');
     }
+
+    public function changeCredentials(): void {
+        Auth::requireAdmin();
+
+        $data = Http::getRequestBody();
+        $currentPassword = $data['current_password'] ?? '';
+        $newCedula = Http::sanitize($data['new_username'] ?? '');
+        $newPassword = $data['new_password'] ?? '';
+        $confirmPassword = $data['confirm_password'] ?? '';
+
+        if ($currentPassword === '') {
+            throw new ApiException('Ingresa tu contraseña actual', 400);
+        }
+
+        if ($newCedula === '' && $newPassword === '') {
+            throw new ApiException('Ingresa un nuevo usuario o una nueva contraseña', 400);
+        }
+
+        $this->handle(function () use ($currentPassword, $newCedula, $newPassword, $confirmPassword) {
+            $user = $this->service->updateCredentials(
+                Auth::currentUser()['id'],
+                $currentPassword,
+                $newCedula,
+                $newPassword,
+                $confirmPassword
+            );
+            Auth::login($user);
+            return $user;
+        }, 200, 'Datos de administrador actualizados correctamente');
+    }
 }

@@ -7,7 +7,7 @@ import { formatDate, formatTime, getTodayStr } from '../../lib/format';
 
 export default function BailarinDashboard() {
   const [fecha, setFecha] = useState(getTodayStr());
-  const [applied, setApplied] = useState(null);
+  const [applied, setApplied] = useState(getTodayStr());
 
   const params = new URLSearchParams();
   if (applied) {
@@ -26,12 +26,12 @@ export default function BailarinDashboard() {
 
   function handleSearch(e) {
     e.preventDefault();
-    setApplied(fecha || null);
+    setApplied(fecha || getTodayStr());
   }
 
   function handleClear() {
     setFecha(getTodayStr());
-    setApplied(null);
+    setApplied(getTodayStr());
   }
 
   return (

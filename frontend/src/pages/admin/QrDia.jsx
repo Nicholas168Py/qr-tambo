@@ -18,7 +18,7 @@ function getQrSize() {
 }
 
 function buildQrUrl(encoded) {
-  const base = new URL('registro-qr', window.location.href);
+  const base = new URL(`${import.meta.env.BASE_URL}registro-qr`, window.location.origin);
   base.searchParams.set('token', encoded);
   return base.toString();
 }

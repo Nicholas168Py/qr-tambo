@@ -44,6 +44,19 @@ final class Usuario {
         return $stmt->execute([$nombre, $id]);
     }
 
+    public static function updateCedula(int $id, string $cedula): bool {
+        $stmt = self::db()->prepare("UPDATE usuarios SET cedula = ? WHERE id = ?");
+        return $stmt->execute([$cedula, $id]);
+    }
+
+    public static function createAdmin(string $cedula, string $nombre, string $passwordHash): int {
+        $stmt = self::db()->prepare(
+            "INSERT IGNORE INTO usuarios (cedula, nombre, password_hash, rol) VALUES (?, ?, ?, 'admin')"
+        );
+        $stmt->execute([$cedula, $nombre, $passwordHash]);
+        return (int) self::db()->lastInsertId();
+    }
+
     public static function existsByCedula(string $cedula): bool {
         $stmt = self::db()->prepare("SELECT id FROM usuarios WHERE cedula = ?");
         $stmt->execute([$cedula]);

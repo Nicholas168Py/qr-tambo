@@ -23,6 +23,13 @@ final class Clase {
         return $clase ?: null;
     }
 
+    public static function findByName(string $nombre): ?array {
+        $stmt = self::db()->prepare("SELECT * FROM clases WHERE nombre = ?");
+        $stmt->execute([$nombre]);
+        $clase = $stmt->fetch();
+        return $clase ?: null;
+    }
+
     public static function create(string $nombre, string $descripcion): array {
         $stmt = self::db()->prepare("INSERT INTO clases (nombre, descripcion) VALUES (?, ?)");
         $stmt->execute([$nombre, $descripcion]);
