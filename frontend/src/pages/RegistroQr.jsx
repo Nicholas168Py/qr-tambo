@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { Lock, CheckCircle2, Info, XCircle, Loader2, QrCode } from 'lucide-react';
 import { api } from '../api/client';
 import { useAuth } from '../stores/auth';
@@ -11,6 +11,7 @@ export default function RegistroQr() {
   const token = searchParams.get('token') || '';
   const { user, login } = useAuth();
   const toast = useToast();
+  const navigate = useNavigate();
 
   const [state, setState] = useState('loading'); // loading | no-token | login | registering | success | error | duplicate | conn-error
   const [result, setResult] = useState(null);
@@ -60,6 +61,16 @@ export default function RegistroQr() {
       toast.error(res.message || 'Error al iniciar sesión');
     }
   }
+
+  // Auto-redirect after successful registration
+  useEffect(() => {
+    if (state === 'success') {
+      const timer = setTimeout(() => {
+        navigate('/bailarin');
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [state, navigate]);
 
   if (state === 'loading') {
     return (

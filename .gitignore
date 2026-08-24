@@ -21,3 +21,17 @@ Thumbs.db
 # Frontend React (Vite)
 frontend/node_modules/
 frontend/dist/
+
+# Variables de entorno locales (no versionar)
+frontend/.env.local
+frontend/.env.*.local
+
+# Archivos de build temporales
+*.tmp
+*.temp
+
+# Cobertura de tests
+coverage/
+
+# Cache de dependencias
+*.cache

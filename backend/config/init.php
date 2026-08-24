@@ -27,36 +27,71 @@ date_default_timezone_set(defined('APP_TIMEZONE') ? APP_TIMEZONE : 'America/Guay
 $sessDir = __DIR__ . '/../sessions';
 if (!is_dir($sessDir)) {
     @mkdir($sessDir, 0777, true);
+    @chmod($sessDir, 0777);
 }
-if (is_writable($sessDir)) {
-    session_save_path($sessDir);
+
+// Configuración de sesión ROBUSTA para hosting compartido
+ini_set('session.save_handler', 'files');
+ini_set('session.save_path', $sessDir);
+// Lifetime razonable (30 días) - 10 años causa problemas en GC y locking
+ini_set('session.gc_maxlifetime', 30 * 24 * 60 * 60);
+ini_set('session.cookie_lifetime', 30 * 24 * 60 * 60);
+ini_set('session.cache_expire', 30 * 24 * 60);
+ini_set('session.use_cookies', 1);
+ini_set('session.use_only_cookies', 1);
+ini_set('session.use_strict_mode', 1);      // Evita fixation
+ini_set('session.use_trans_sid', 0);        // No URLs con session ID
+ini_set('session.gc_probability', 1);
+ini_set('session.gc_divisor', 100);         // 1% probability
+
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
+session_set_cookie_params([
+    'lifetime' => 30 * 24 * 60 * 60,
+    'path' => '/',
+    'domain' => '',
+    'secure' => $isHttps,
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
+// Start session con manejo de errores y recovery
+if (session_status() === PHP_SESSION_NONE) {
+    $started = @session_start();
+    if (!$started) {
+        // Intento de recovery: limpiar sesión corrupta y reintentar
+        error_log('[SESSION] session_start() falló. save_path=' . session_save_path() . ' writable=' . (is_writable(session_save_path()) ? 'yes' : 'no'));
+        
+        // Cerrar cualquier sesión residual
+        if (session_status() !== PHP_SESSION_NONE) {
+            @session_write_close();
+        }
+        // Limpiar cookie del cliente si existe
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            @setcookie(session_name(), '', [
+                'expires' => time() - 3600,
+                'path' => $params['path'],
+                'domain' => $params['domain'],
+                'secure' => $params['secure'],
+                'httponly' => $params['httponly'],
+                'samesite' => $params['samesite']
+            ]);
+        }
+        // Reintentar una vez
+        @session_start();
+    }
+}
+
+// Regenerate session ID on privilege change (security)
+if (!empty($_SESSION['__regenerate'])) {
+    session_regenerate_id(true);
+    unset($_SESSION['__regenerate']);
 }
 
 // Set JSON header early for API calls
 $isApi = isset($_SERVER['REQUEST_URI']) && strpos($_SERVER['REQUEST_URI'], '/api/') !== false;
 if ($isApi) {
     header('Content-Type: application/json; charset=utf-8');
-}
-
-// Session persistence: keep session until explicit logout
-$tenYears = 10 * 365 * 24 * 60 * 60;
-ini_set('session.cookie_lifetime', $tenYears);
-ini_set('session.gc_maxlifetime', $tenYears);
-ini_set('session.cache_expire', $tenYears / 60);
-ini_set('session.use_cookies', 1);
-ini_set('session.use_only_cookies', 1);
-session_set_cookie_params([
-    'lifetime' => $tenYears,
-    'path' => '/',
-    'domain' => '',
-    'secure' => false,
-    'httponly' => true,
-    'samesite' => 'Lax'
-]);
-
-// Start session if not already started
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
 }
 
 // Include database connection

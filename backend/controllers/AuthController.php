@@ -62,7 +62,10 @@ final class AuthController extends ApiController {
     }
 
     public function me(): void {
-        Auth::requireLogin();
+        if (!Auth::isLoggedIn()) {
+            Http::jsonResponse(['success' => false, 'message' => 'Debes iniciar sesión para acceder'], 401);
+            return;
+        }
         $this->handleRaw(fn () => [
             'success' => true,
             'data' => Auth::currentUser()

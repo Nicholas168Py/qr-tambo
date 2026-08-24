@@ -3,10 +3,11 @@ import { useAuth } from '../stores/auth';
 import { useToast } from '../stores/toast';
 import {
   LayoutDashboard, Music, CalendarDays, CheckCircle2, BarChart3, Users, QrCode, Settings, LogOut,
+  Camera, ClipboardList, User,
 } from 'lucide-react';
 import { LOGO } from '../lib/assets';
 
-const LINKS = [
+const ADMIN_LINKS = [
   { to: '/admin', end: true, icon: LayoutDashboard, label: 'Resumen' },
   { to: '/admin/clases', icon: Music, label: 'Clases' },
   { to: '/admin/horarios', icon: CalendarDays, label: 'Horarios' },
@@ -17,14 +18,25 @@ const LINKS = [
   { to: '/admin/configuracion', icon: Settings, label: 'Configuración' },
 ];
 
-export default function Sidebar({ open, onClose }) {
+const BAILARIN_LINKS = [
+  { to: '/bailarin/escanear', icon: Camera, label: 'Leer QR' },
+  { to: '/bailarin/horarios', icon: CalendarDays, label: 'Horarios' },
+  { to: '/bailarin', icon: ClipboardList, label: 'Mis Asistencias' },
+  { to: '/bailarin/perfil', icon: User, label: 'Perfil' },
+];
+
+export function Sidebar({ open, onClose, role = 'admin' }) {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const toast = useToast();
 
+  const links = role === 'admin' ? ADMIN_LINKS : BAILARIN_LINKS;
+  const panelTitle = role === 'admin' ? 'Panel de Administración' : 'Panel de Bailarín';
+  const userRole = role === 'admin' ? 'Administrador' : 'Bailarín';
+
   async function handleLogout() {
     await logout();
-    toast.info('SesiÃ³n cerrada');
+    toast.info('Sesión cerrada');
     navigate('/login');
   }
 
@@ -34,10 +46,10 @@ export default function Sidebar({ open, onClose }) {
       <aside className={`sidebar ${open ? 'open' : ''}`} id="sidebar">
         <div className="sidebar-logo">
           <img src={LOGO} alt="QR Tambo" className="sidebar-logo-img" />
-          <small>Panel de AdministraciÃ³n</small>
+          <small>{panelTitle}</small>
         </div>
         <nav className="sidebar-nav">
-          {LINKS.map((l) => {
+          {links.map((l) => {
             const Icon = l.icon;
             return (
               <NavLink
@@ -58,12 +70,12 @@ export default function Sidebar({ open, onClose }) {
             <div className="user-avatar">{(user?.nombre || 'U').charAt(0).toUpperCase()}</div>
             <div className="user-info">
               <div className="user-name">{user?.nombre}</div>
-              <div className="user-role">Administrador</div>
+              <div className="user-role">{userRole}</div>
             </div>
           </div>
           <button className="nav-link" onClick={handleLogout} style={{ color: 'var(--error)' }}>
             <span className="nav-icon"><LogOut size={18} /></span>
-            Cerrar SesiÃ³n
+            Cerrar Sesión
           </button>
         </div>
       </aside>

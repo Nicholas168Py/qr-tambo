@@ -1,11 +1,24 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
+const buildTimestamp = Date.now();
+
 // Dev: served at http://localhost:5173/ (proxy forwards /backend/api to XAMPP).
-// Prod: built to dist/ and served by Apache at /qr_tambo/frontend/dist/.
+// Prod: built to dist/ and served by Apache at / (docroot).
 export default defineConfig(({ mode }) => ({
-  plugins: [react()],
-  base: mode === 'production' ? '/qr_tambo/frontend/dist/' : '/',
+  plugins: [
+    react(),
+    {
+      name: 'inject-build-timestamp',
+      transformIndexHtml(html) {
+        return html.replace('__BUILD_TIMESTAMP__', buildTimestamp);
+      },
+    },
+  ],
+  base: '/',
+  define: {
+    __BUILD_TIMESTAMP__: buildTimestamp,
+  },
   build: {
     outDir: 'dist',
     emptyOutDir: true,

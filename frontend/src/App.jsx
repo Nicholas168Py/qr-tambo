@@ -73,7 +73,7 @@ export default function App() {
           path="/bailarin"
           element={<RequireBailarin><BailarinLayout /></RequireBailarin>}
         >
-          <Route index element={<BailarinDashboard />} />
+          <Route index element={<Navigate to="/bailarin/escanear" replace />} />
           <Route path="escanear" element={<Escanear />} />
           <Route path="horarios" element={<BailarinHorarios />} />
           <Route path="perfil" element={<Perfil />} />
@@ -89,5 +89,6 @@ export default function App() {
 
 function HomeRedirect() {
   const { user } = useAuth();
-  return <Navigate to={user?.rol === 'admin' ? '/admin' : '/bailarin'} replace />;
+  if (!user) return <Navigate to="/login" replace />;
+  return <Navigate to={user.rol === 'admin' ? '/admin' : '/bailarin/escanear'} replace />;
 }

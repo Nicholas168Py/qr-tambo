@@ -11,6 +11,27 @@
       rel="stylesheet"
     />
     <title>QR Tambo</title>
+    <meta name="build-timestamp" content="__BUILD_TIMESTAMP__" />
+    <script>
+      (function () {
+        var buildTimestamp = document.querySelector('meta[name="build-timestamp"]')?.content;
+        if (!buildTimestamp) return;
+        var lastBuild = localStorage.getItem('qr_tambo_build');
+        if (lastBuild && lastBuild !== buildTimestamp) {
+          // New deployment detected - clear caches and force reload
+          if ('caches' in window) {
+            caches.keys().then(function (names) {
+              names.forEach(function (name) { caches.delete(name); });
+            });
+          }
+          localStorage.removeItem('qr_tambo_build');
+          sessionStorage.clear();
+          window.location.reload(true);
+          return;
+        }
+        localStorage.setItem('qr_tambo_build', buildTimestamp);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
