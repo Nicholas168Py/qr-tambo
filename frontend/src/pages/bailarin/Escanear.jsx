@@ -1,25 +1,70 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Html5Qrcode } from 'html5-qrcode';
 import { Camera, CheckCircle2, Info, XCircle, Loader2, RefreshCw } from 'lucide-react';
 import { api } from '../../api/client';
 import { formatDate, formatTime } from '../../lib/format';
 
 export default function Escanear() {
+  const navigate = useNavigate();
   const scannerRef = useRef(null);
   const [status, setStatus] = useState('idle'); // idle | scanning | processing | success | duplicate | error | no-camera | no-token
   const [result, setResult] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [cameraError, setCameraError] = useState('');
+  const startedRef = useRef(false);
+
+  // Lock scroll on mobile while Escanear is mounted
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlTouchAction = html.style.touchAction;
+    const prevBodyTouchAction = body.style.touchAction;
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    html.style.touchAction = 'none';
+    body.style.touchAction = 'none';
+
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      html.style.touchAction = prevHtmlTouchAction;
+      body.style.touchAction = prevBodyTouchAction;
+    };
+  }, []);
+
+  // Auto-start camera on mount
+  useEffect(() => {
+    if (!startedRef.current) {
+      startedRef.current = true;
+      // Small delay to ensure DOM is ready
+      const timer = setTimeout(() => {
+        startCamera();
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+    return () => {
+      stopCamera();
+    };
+  }, []);
 
   async function startCamera() {
-    setStatus('scanning');
     setResult(null);
     setErrorMsg('');
     setCameraError('');
 
     if (!scannerRef.current) {
-      scannerRef.current = new Html5Qrcode('scanner-container');
+      // Use element ID string - more reliable with Html5Qrcode
+      const elementId = 'scanner-container';
+      console.log('[SCANNER] Creating Html5Qrcode with ID:', elementId);
+      console.log('[SCANNER] Element exists:', !!document.getElementById(elementId));
+      scannerRef.current = new Html5Qrcode(elementId);
     }
+
+    setStatus('scanning');
 
     try {
       await scannerRef.current.start(
@@ -89,6 +134,16 @@ export default function Escanear() {
     setCameraError('');
   }
 
+  // Auto-redirect after successful scan
+  useEffect(() => {
+    if (status === 'success') {
+      const timer = setTimeout(() => {
+        navigate('/bailarin');
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [status, navigate]);
+
   if (status === 'success') {
     return (
       <div className="scan-result">
@@ -147,9 +202,11 @@ export default function Escanear() {
         Apunta la cámara al código QR que muestra el instructor
       </p>
 
-      {status === 'scanning' && (
-        <div id="scanner-container" style={{ display: 'block' }}></div>
-      )}
+      {/* Container always rendered with fixed ID for Html5Qrcode */}
+      <div
+        id="scanner-container"
+        style={{ display: status === 'scanning' ? 'block' : 'none' }}
+      />
 
       {status === 'idle' ? (
         <div className="glass-card scan-card" onClick={startCamera}>

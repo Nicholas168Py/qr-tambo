@@ -217,6 +217,28 @@ export default function Login() {
   const navigate = useNavigate();
   const { canvasRef, wavesRef, glowRef, blobsRef } = useLoginScene();
 
+  // Lock scroll on mobile while login is mounted
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    const prevHtmlTouchAction = html.style.touchAction;
+    const prevBodyTouchAction = body.style.touchAction;
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    html.style.touchAction = 'none';
+    body.style.touchAction = 'none';
+
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      html.style.touchAction = prevHtmlTouchAction;
+      body.style.touchAction = prevBodyTouchAction;
+    };
+  }, []);
+
   const [cedula, setCedula] = useState('');
   const [password, setPassword] = useState('');
   const [remember, setRemember] = useState(true);
@@ -234,7 +256,8 @@ export default function Login() {
     setSubmitting(false);
     if (result.success) {
       toast.success(`¡Bienvenido, ${result.data.nombre}!`);
-      setTimeout(() => navigate(result.data.rol === 'admin' ? '/admin' : '/bailarin'), 800);
+      const { getDefaultRoute } = useAuth.getState();
+      setTimeout(() => navigate(getDefaultRoute()), 800);
     } else {
       toast.error(result.message || 'Error al iniciar sesión');
     }

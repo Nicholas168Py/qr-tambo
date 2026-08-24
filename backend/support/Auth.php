@@ -35,6 +35,10 @@ final class Auth {
     }
 
     public static function login(array $user): void {
+        // Regenerate session ID to prevent fixation
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_regenerate_id(true);
+        }
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['cedula'] = $user['cedula'];
         $_SESSION['nombre'] = $user['nombre'];
@@ -48,11 +52,12 @@ final class Auth {
 
         if (ini_get('session.use_cookies')) {
             $params = session_get_cookie_params();
+            $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
             setcookie(session_name(), '', [
                 'expires' => time() - 3600,
                 'path' => $params['path'],
                 'domain' => $params['domain'],
-                'secure' => $params['secure'],
+                'secure' => $isHttps,
                 'httponly' => $params['httponly'],
                 'samesite' => 'Lax'
             ]);

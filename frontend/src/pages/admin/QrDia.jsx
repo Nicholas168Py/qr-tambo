@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import QRCode from 'qrcode';
 import { CalendarDays, ArrowRight, CheckCircle2, Star, Loader2, QrCode } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function QrDia() {
   const [day, setDay] = useState(getCurrentDayNumber());
   const [index, setIndex] = useState(0);
   const [finished, setFinished] = useState(false);
-  const [qrDataUrl, setQrDataUrl] = useState('');
+  const qrCanvasRef = useRef(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ['clases-por-dia', day],
@@ -46,22 +46,60 @@ export default function QrDia() {
 
   const current = clases[index];
 
-  // Generate QR whenever current class changes
+  // Generate QR directly on canvas when current class or date changes
   useEffect(() => {
-    if (current && dayData.fecha) {
-      const raw = {
-        c: current.clase_nombre,
-        f: dayData.fecha,
-        h: current.hora_inicio,
-        t: generateToken(),
-        i: current.id,
-      };
-      const encoded = btoa(JSON.stringify(raw));
-      const url = buildQrUrl(encoded);
-      QRCode.toDataURL(url, { width: getQrSize(), margin: 1, color: { dark: '#06080D', light: '#ffffff' } })
-        .then((d) => setQrDataUrl(d));
+    const canvas = qrCanvasRef.current;
+    if (!current || !dayData.fecha || !canvas) {
+      return;
     }
-  }, [current, dayData.fecha]);
+
+    // Capture current values to avoid race conditions
+    const currentId = current.id;
+    const currentFecha = dayData.fecha;
+
+    const raw = {
+      c: current.clase_nombre,
+      f: dayData.fecha,
+      h: current.hora_inicio,
+      t: generateToken(),
+      i: current.id,
+    };
+    // Proper UTF-8 to base64 encoding (btoa only supports Latin-1)
+    const jsonStr = JSON.stringify(raw);
+    const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
+    const url = buildQrUrl(encoded);
+
+    const size = getQrSize();
+
+    // Set canvas dimensions (CSS pixels)
+    canvas.width = size;
+    canvas.height = size;
+    canvas.style.width = `${size}px`;
+    canvas.style.height = `${size}px`;
+
+    QRCode.toCanvas(canvas, url, {
+      width: size,
+      margin: 1,
+      color: {
+        dark: '#06080D',
+        light: '#ffffff'
+      }
+    })
+      .then(() => {
+        // Verify the canvas still belongs to the same class (race condition guard)
+        if (qrCanvasRef.current === canvas && currentId === index && currentFecha === dayData.fecha) {
+          // QR generated successfully for current class
+        }
+      })
+      .catch((err) => {
+        console.error('[QR] Error generando QR:', err);
+        // Clear canvas on error to avoid showing stale QR
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+  }, [current, dayData.fecha, index]);
 
   function handleDaySelect(d) {
     setDay(d);
@@ -138,7 +176,10 @@ export default function QrDia() {
               {formatTime(current?.hora_inicio)} - {formatTime(current?.hora_fin)}
             </div>
             <div className="qr-container">
-              {qrDataUrl && <img src={qrDataUrl} alt="Código QR de asistencia" width={getQrSize()} height={getQrSize()} />}
+              <canvas
+                ref={qrCanvasRef}
+                aria-label="Código QR de asistencia"
+              />
             </div>
             <div className="qr-progress">
               Clase {index + 1} de {clases.length}

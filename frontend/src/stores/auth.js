@@ -6,8 +6,14 @@ export const useAuth = create((set, get) => ({
   loading: true,
 
   async init() {
-    const result = await api('auth/me', 'GET');
-    set({ user: result.success ? result.data : null, loading: false });
+    try {
+      const result = await api('auth/me', 'GET');
+      set({ user: result.success ? result.data : null, loading: false });
+    } catch (e) {
+      // Error de red o servidor - limpiar sesión y no bloquear la app
+      console.error('[AUTH] init() error:', e);
+      set({ user: null, loading: false });
+    }
   },
 
   async login(cedula, password) {
@@ -16,6 +22,12 @@ export const useAuth = create((set, get) => ({
       set({ user: result.data });
     }
     return result;
+  },
+
+  getDefaultRoute() {
+    const { user } = get();
+    if (!user) return '/login';
+    return user.rol === 'admin' ? '/admin' : '/bailarin/escanear';
   },
 
   async logout() {

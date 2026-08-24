@@ -1,22 +1,19 @@
+import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { useAuth } from '../stores/auth';
-import { BailarinNavItems } from '../components/Nav';
+import { Sidebar } from '../components/Sidebar';
+import { TopBar, BailarinNavItems } from '../components/Nav';
 
 export default function BailarinLayout() {
-  const { user } = useAuth();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
     <div className="bailarin-layout">
-      <header className="bailarin-header">
-        <h2>QR Tambo</h2>
-        <div className="bailarin-header-actions">
-          <span>{user?.nombre}</span>
-        </div>
-      </header>
-      <main className="bailarin-main">
+      <TopBar showMenu onMenu={() => setSidebarOpen(true)} />
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} role="bailarin" />
+      <div className="bailarin-main">
         <Outlet />
-      </main>
-      <BailarinNavItems />
+      </div>
+      <BailarinNavItems onNavigate={() => setSidebarOpen(false)} />
     </div>
   );
 }

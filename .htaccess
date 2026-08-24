@@ -1,0 +1,16 @@
+RewriteEngine On
+RewriteBase /
+
+# Archivos y directorios reales
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Excluir backend y assets
+RewriteRule ^backend/ - [L]
+RewriteRule ^assets/ - [L]
+
+# SPA fallback
+RewriteRule ^ index.html [L]
+
+DirectoryIndex index.html
