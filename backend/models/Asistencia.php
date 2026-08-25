@@ -13,34 +13,57 @@ final class Asistencia {
     }
 
     public static function filter(array $filters): array {
-        $sql = "SELECT id, cedula, nombre, clase, fecha, hora_registro FROM asistencia WHERE 1=1";
+        $page = isset($filters['page']) ? max(1, (int)$filters['page']) : 1;
+        $perPage = isset($filters['per_page']) ? min(100, max(1, (int)$filters['per_page'])) : 10;
+        $offset = ($page - 1) * $perPage;
+
+        $where = "WHERE 1=1";
         $params = [];
 
         if (!empty($filters['cedula'])) {
-            $sql .= " AND cedula = ?";
+            $where .= " AND cedula = ?";
             $params[] = $filters['cedula'];
         }
 
         if (!empty($filters['clase'])) {
-            $sql .= " AND clase = ?";
+            $where .= " AND clase = ?";
             $params[] = $filters['clase'];
         }
 
         if (!empty($filters['mes']) && $filters['mes'] >= 1 && $filters['mes'] <= 12) {
-            $sql .= " AND MONTH(fecha) = ?";
+            $where .= " AND MONTH(fecha) = ?";
             $params[] = $filters['mes'];
         }
 
         if (!empty($filters['anio']) && $filters['anio'] > 0) {
-            $sql .= " AND YEAR(fecha) = ?";
+            $where .= " AND YEAR(fecha) = ?";
             $params[] = $filters['anio'];
         }
 
-        $sql .= " ORDER BY fecha DESC, hora_registro DESC LIMIT 500";
+        $sqlCount = "SELECT COUNT(*) as total FROM asistencia $where";
+        $stmtCount = self::db()->prepare($sqlCount);
+        $stmtCount->execute($params);
+        $total = (int) $stmtCount->fetch()['total'];
+
+        $sql = "SELECT id, cedula, nombre, clase, fecha, hora_registro FROM asistencia $where ORDER BY fecha DESC, hora_registro DESC LIMIT ? OFFSET ?";
+        $params[] = $perPage;
+        $params[] = $offset;
 
         $stmt = self::db()->prepare($sql);
         $stmt->execute($params);
-        return $stmt->fetchAll();
+        $data = $stmt->fetchAll();
+
+        return [
+            'data' => $data,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => (int) ceil($total / $perPage),
+                'from' => $total > 0 ? $offset + 1 : 0,
+                'to' => min($offset + $perPage, $total),
+            ]
+        ];
     }
 
     public static function exists(string $cedula, string $clase, string $fecha): bool {

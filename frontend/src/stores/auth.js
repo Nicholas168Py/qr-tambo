@@ -10,7 +10,6 @@ export const useAuth = create((set, get) => ({
       const result = await api('auth/me', 'GET');
       set({ user: result.success ? result.data : null, loading: false });
     } catch (e) {
-      // Error de red o servidor - limpiar sesión y no bloquear la app
       console.error('[AUTH] init() error:', e);
       set({ user: null, loading: false });
     }
@@ -18,6 +17,7 @@ export const useAuth = create((set, get) => ({
 
   async login(cedula, password) {
     const result = await api('auth/login', 'POST', { cedula, password });
+    console.log('[AUTH] login response:', result);
     if (result.success) {
       set({ user: result.data });
     }

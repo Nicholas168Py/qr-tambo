@@ -45,13 +45,17 @@ ini_set('session.gc_probability', 1);
 ini_set('session.gc_divisor', 100);         // 1% probability
 
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
+// Detect if we're on localhost or IP address for mobile compatibility
+$isLocalhost = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1', '::1'], true);
+$cookieDomain = $isLocalhost ? '' : ($_SERVER['SERVER_NAME'] ?? '');
+
 session_set_cookie_params([
     'lifetime' => 30 * 24 * 60 * 60,
     'path' => '/',
-    'domain' => '',
+    'domain' => $cookieDomain,
     'secure' => $isHttps,
     'httponly' => true,
-    'samesite' => 'Lax'
+    'samesite' => $isHttps ? 'None' : 'Lax'  // None for HTTPS (required for cross-site), Lax for HTTP
 ]);
 
 // Start session con manejo de errores y recovery

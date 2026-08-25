@@ -37,8 +37,8 @@ export default function Register() {
       toast.warning('Las contraseñas no coinciden');
       return;
     }
-    if (password.length < 4) {
-      toast.warning('La contraseña debe tener al menos 4 caracteres');
+    if (password.length < 6) {
+      toast.warning('La contraseña debe tener al menos 6 caracteres');
       return;
     }
     setSubmitting(true);
@@ -79,7 +79,7 @@ export default function Register() {
             placeholder="Número de cédula" value={cedula}
             onChange={(e) => setCedula(e.target.value)} />
           <Field icon={Lock} label="Contraseña" id="password" type="password"
-            minLength={4} placeholder="Mínimo 4 caracteres" value={password}
+            minLength={6} placeholder="Mínimo 6 caracteres" value={password}
             onChange={(e) => setPassword(e.target.value)} />
           <Field icon={Lock} label="Confirmar Contraseña" id="password_confirm" type="password"
             placeholder="Repite tu contraseña" value={confirm}

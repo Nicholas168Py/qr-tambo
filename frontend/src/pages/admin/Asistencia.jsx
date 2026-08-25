@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, X, Loader2, CheckCircle2 } from 'lucide-react';
+import { Search, X, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { api } from '../../api/client';
 import { EmptyState } from '../../components/ui';
 import { formatDate, formatTime, getTodayStr } from '../../lib/format';
 
 export default function Asistencia() {
-  const [fecha, setFecha] = useState(getTodayStr());
+  const [fecha, setFecha] = useState('');
   const [cedula, setCedula] = useState('');
   const [clase, setClase] = useState('');
-  const [applied, setApplied] = useState(null);
+  const [page, setPage] = useState(1);
+  const [applied, setApplied] = useState({});
 
   function buildParams() {
     const p = new URLSearchParams();
@@ -17,16 +18,18 @@ export default function Asistencia() {
     if (applied.anio) p.set('anio', applied.anio);
     if (applied.cedula) p.set('cedula', applied.cedula);
     if (applied.clase) p.set('clase', applied.clase);
+    p.set('page', String(page));
+    p.set('per_page', '10');
     return p.toString();
   }
 
   const { data, isLoading, isFetching } = useQuery({
-    queryKey: ['asistencia-admin', applied],
-    queryFn: () => api(`asistencia${buildParams() ? `?${buildParams()}` : ''}`),
-    enabled: applied !== null,
+    queryKey: ['asistencia-admin', applied, page],
+    queryFn: () => api(`asistencia?${buildParams()}`),
   });
 
   const rows = data?.data || [];
+  const pagination = data?.pagination || { current_page: 1, last_page: 1, per_page: 10, total: 0 };
 
   function handleFilter(e) {
     e.preventDefault();
@@ -39,13 +42,21 @@ export default function Asistencia() {
     if (cedula.trim()) next.cedula = cedula.trim();
     if (clase.trim()) next.clase = clase.trim();
     setApplied(next);
+    setPage(1);
   }
 
   function handleClear() {
     setFecha('');
     setCedula('');
     setClase('');
-    setApplied(null);
+    setApplied({});
+    setPage(1);
+  }
+
+  function handlePageChange(newPage) {
+    if (newPage >= 1 && newPage <= pagination.last_page) {
+      setPage(newPage);
+    }
   }
 
   return (
@@ -57,8 +68,8 @@ export default function Asistencia() {
 
       <form className="glass-card filter-bar" onSubmit={handleFilter}>
         <div className="form-group">
-          <label htmlFor="filtroFecha">Fecha</label>
-          <input id="filtroFecha" type="date" className="form-input" value={fecha} onChange={(e) => setFecha(e.target.value)} />
+          <label htmlFor="filtroFecha">Fecha (Mes/Año)</label>
+          <input id="filtroFecha" type="month" className="form-input" value={fecha} onChange={(e) => setFecha(e.target.value)} />
         </div>
         <div className="form-group">
           <label htmlFor="filtroCedula">Cédula</label>
@@ -72,39 +83,61 @@ export default function Asistencia() {
         <button className="btn btn-secondary" type="button" onClick={handleClear}><X size={18} /> Limpiar</button>
       </form>
 
-      {applied === null ? (
-        <EmptyState icon={Search} message="Usa los filtros y pulsa «Filtrar» para consultar asistencias" />
-      ) : isLoading || isFetching ? (
+      {isLoading || isFetching ? (
         <div className="empty-state"><Loader2 size={40} className="spin" /></div>
       ) : rows.length === 0 ? (
         <EmptyState icon={CheckCircle2} message="No hay registros de asistencia" />
       ) : (
-        <div className="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Cédula</th>
-                <th>Nombre</th>
-                <th>Clase</th>
-                <th>Fecha</th>
-                <th>Hora</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r, i) => (
-                <tr key={r.id}>
-                  <td>{i + 1}</td>
-                  <td>{r.cedula}</td>
-                  <td>{r.nombre}</td>
-                  <td>{r.clase}</td>
-                  <td>{formatDate(r.fecha)}</td>
-                  <td>{formatTime(r.hora_registro)}</td>
+        <>
+          <div className="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Cédula</th>
+                  <th>Nombre</th>
+                  <th>Clase</th>
+                  <th>Fecha</th>
+                  <th>Hora</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {rows.map((r, i) => (
+                  <tr key={r.id}>
+                    <td>{(pagination.current_page - 1) * pagination.per_page + i + 1}</td>
+                    <td>{r.cedula}</td>
+                    <td>{r.nombre}</td>
+                    <td>{r.clase}</td>
+                    <td>{formatDate(r.fecha)}</td>
+                    <td>{formatTime(r.hora_registro)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {pagination.last_page > 1 && (
+            <div className="pagination" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginTop: '16px', flexWrap: 'wrap' }}>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => handlePageChange(pagination.current_page - 1)}
+                disabled={pagination.current_page <= 1}
+              >
+                <ChevronLeft size={16} /> Anterior
+              </button>
+              <span style={{ padding: '0 12px', color: 'var(--text-secondary)' }}>
+                Página {pagination.current_page} de {pagination.last_page} ({pagination.total} registros)
+              </span>
+              <button
+                className="btn btn-secondary btn-sm"
+                onClick={() => handlePageChange(pagination.current_page + 1)}
+                disabled={pagination.current_page >= pagination.last_page}
+              >
+                Siguiente <ChevronRight size={16} />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </>
   );

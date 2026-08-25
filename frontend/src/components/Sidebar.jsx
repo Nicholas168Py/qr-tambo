@@ -21,7 +21,7 @@ const ADMIN_LINKS = [
 const BAILARIN_LINKS = [
   { to: '/bailarin/escanear', icon: Camera, label: 'Leer QR' },
   { to: '/bailarin/horarios', icon: CalendarDays, label: 'Horarios' },
-  { to: '/bailarin', icon: ClipboardList, label: 'Mis Asistencias' },
+  { to: '/bailarin/asistencias', icon: ClipboardList, label: 'Mis Asistencias' },
   { to: '/bailarin/perfil', icon: User, label: 'Perfil' },
 ];
 

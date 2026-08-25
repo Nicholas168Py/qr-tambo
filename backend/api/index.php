@@ -8,6 +8,26 @@ require __DIR__ . '/../config/init.php';
 
 use Support\Router;
 
+// CORS headers for mobile browser compatibility
+$origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+$allowedOrigins = [
+    'http://localhost',
+    'http://localhost:5173',
+    'http://127.0.0.1',
+    'http://127.0.0.1:5173',
+];
+if ($origin && in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, X-Requested-With');
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
 $router = new Router();
 
 $routes = require __DIR__ . '/../routes/api.php';

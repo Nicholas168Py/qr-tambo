@@ -253,13 +253,15 @@ export default function Login() {
     }
     setSubmitting(true);
     const result = await login(cedula.trim(), password);
+    console.log('[LOGIN] Result:', result);
     setSubmitting(false);
     if (result.success) {
       toast.success(`¡Bienvenido, ${result.data.nombre}!`);
       const { getDefaultRoute } = useAuth.getState();
       setTimeout(() => navigate(getDefaultRoute()), 800);
     } else {
-      toast.error(result.message || 'Error al iniciar sesión');
+      const errorMsg = result.message || `Error al iniciar sesión (code: ${result.code || 'unknown'})`;
+      toast.error(errorMsg);
     }
   }
 

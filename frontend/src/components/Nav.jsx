@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../stores/auth';
 import { LOGO } from '../lib/assets';
 import { Menu, QrCode, CalendarDays, CheckCircle2, Music, Camera, ClipboardList, User } from 'lucide-react';
@@ -27,7 +27,7 @@ export function BailarinNavItems({ onNavigate }) {
   const items = [
     { key: 'scan', to: '/bailarin/escanear', icon: 'scan', label: 'Leer QR' },
     { key: 'horarios', to: '/bailarin/horarios', icon: 'horarios', label: 'Horarios' },
-    { key: 'asistencias', to: '/bailarin', icon: 'asistencias', label: 'Mis Asistencias' },
+    { key: 'asistencias', to: '/bailarin/asistencias', icon: 'asistencias', label: 'Mis Asistencias' },
     { key: 'perfil', to: '/bailarin/perfil', icon: 'perfil', label: 'Perfil' },
   ];
   return <BottomNavItems items={items} onNavigate={onNavigate} />;
@@ -35,6 +35,7 @@ export function BailarinNavItems({ onNavigate }) {
 
 function BottomNavItems({ items, onNavigate }) {
   const navigate = useNavigate();
+  const location = useLocation();
   return (
     <nav className="bottom-nav" id="bottomNav">
       {items.map((item) => {

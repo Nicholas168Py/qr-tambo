@@ -24,10 +24,12 @@ final class AsistenciaController extends ApiController {
 
         $user = Auth::currentUser();
         $filters = [
-            'cedula' => isset($_GET['cedula']) ? Http::sanitize($_GET['cedula']) : '',
-            'clase' => isset($_GET['clase']) ? Http::sanitize($_GET['clase']) : '',
+            'cedula' => isset($_GET['cedula']) ? trim($_GET['cedula']) : '',
+            'clase' => isset($_GET['clase']) ? trim($_GET['clase']) : '',
             'mes' => isset($_GET['mes']) ? (int) $_GET['mes'] : 0,
-            'anio' => isset($_GET['anio']) ? (int) $_GET['anio'] : 0
+            'anio' => isset($_GET['anio']) ? (int) $_GET['anio'] : 0,
+            'page' => isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1,
+            'per_page' => isset($_GET['per_page']) ? min(100, max(1, (int) $_GET['per_page'])) : 10
         ];
 
         $this->handle(fn () => $this->service->listFor($user, $filters), 200, 'Asistencia obtenida');

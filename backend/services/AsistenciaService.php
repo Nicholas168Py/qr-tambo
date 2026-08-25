@@ -23,7 +23,9 @@ final class AsistenciaService {
             'cedula' => $cedulaFilter,
             'clase' => $filters['clase'] ?? null,
             'mes' => $filters['mes'] ?? null,
-            'anio' => $filters['anio'] ?? null
+            'anio' => $filters['anio'] ?? null,
+            'page' => $filters['page'] ?? null,
+            'per_page' => $filters['per_page'] ?? null
         ]);
     }
 
