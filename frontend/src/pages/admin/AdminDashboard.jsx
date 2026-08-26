@@ -31,7 +31,7 @@ export default function AdminDashboard() {
         <StatCard icon={Music} value={clases.data?.data?.length ?? '—'} label="Clases" />
         <StatCard icon={CalendarDays} value={horarios.data?.data?.length ?? '—'} label="Horarios" />
         <StatCard icon={Users} value={usuarios.data?.total ?? '—'} label="Bailarines" />
-        <StatCard icon={CheckCircle2} value={asistencia.data?.data?.length ?? '—'} label="Asistencias este mes" />
+        <StatCard icon={CheckCircle2} value={asistencia.data?.pagination?.total ?? asistencia.data?.data?.length ?? '—'} label="Asistencias este mes" />
       </div>
 
       <div className="glass-card">
