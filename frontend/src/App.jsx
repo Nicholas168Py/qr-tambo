@@ -21,10 +21,10 @@ import AdminBailarines from './pages/admin/Bailarines';
 import AdminConfiguracion from './pages/admin/Configuracion';
 import QrDia from './pages/admin/QrDia';
 
-import BailarinDashboard from './pages/bailarin/BailarinDashboard';
 import Escanear from './pages/bailarin/Escanear';
 import BailarinHorarios from './pages/bailarin/Horarios';
 import Perfil from './pages/bailarin/Perfil';
+import BailarinAsistencias from './pages/bailarin/Asistencias';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,6 +75,7 @@ export default function App() {
         >
           <Route index element={<Navigate to="/bailarin/escanear" replace />} />
           <Route path="escanear" element={<Escanear />} />
+          <Route path="asistencias" element={<BailarinAsistencias />} />
           <Route path="horarios" element={<BailarinHorarios />} />
           <Route path="perfil" element={<Perfil />} />
         </Route>

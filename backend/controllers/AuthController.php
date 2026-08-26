@@ -21,16 +21,23 @@ final class AuthController extends ApiController {
 
     public function login(): void {
         $data = Http::getRequestBody();
-        $cedula = Http::sanitize($data['cedula'] ?? '');
+        $cedula = trim($data['cedula'] ?? '');
         $password = $data['password'] ?? '';
+        $remember = !empty($data['remember']);
 
         if ($cedula === '' || $password === '') {
             throw new ApiException('Cédula y contraseña son requeridos', 400);
         }
 
-        $this->handle(function () use ($cedula, $password) {
+        error_log('[AUTH] Login attempt for cedula=' . $cedula . ' remember=' . ($remember ? '1' : '0'));
+
+        $this->handle(function () use ($cedula, $password, $remember) {
             $user = $this->service->login($cedula, $password);
             Auth::login($user);
+
+            if ($remember) {
+                Auth::extendCookieLifetime();
+            }
 
             return [
                 'nombre' => $user['nombre'],
@@ -42,13 +49,15 @@ final class AuthController extends ApiController {
 
     public function register(): void {
         $data = Http::getRequestBody();
-        $nombre = Http::sanitize($data['nombre'] ?? '');
-        $cedula = Http::sanitize($data['cedula'] ?? '');
+        $nombre = trim($data['nombre'] ?? '');
+        $cedula = trim($data['cedula'] ?? '');
         $password = $data['password'] ?? '';
 
         if ($nombre === '' || $cedula === '' || $password === '') {
             throw new ApiException('Todos los campos son requeridos', 400);
         }
+
+        error_log('[AUTH] Register attempt for cedula=' . $cedula . ', nombre=' . $nombre);
 
         $this->handle(function () use ($nombre, $cedula, $password) {
             $this->service->register($nombre, $cedula, $password);

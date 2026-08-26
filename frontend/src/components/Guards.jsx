@@ -28,6 +28,6 @@ export function RequireBailarin({ children }) {
 export function RedirectIfAuth({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <LoadingOverlay visible />;
-  if (user) return <Navigate to={user.rol === 'admin' ? '/admin' : '/bailarin'} replace />;
+  if (user) return <Navigate to={user.rol === 'admin' ? '/admin' : '/bailarin/escanear'} replace />;
   return children;
 }

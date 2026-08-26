@@ -31,9 +31,15 @@ abstract class ApiController {
         } catch (ApiException $e) {
             Http::jsonResponse(['success' => false, 'message' => $e->getMessage()], $e->getCode());
         } catch (\PDOException $e) {
-            Http::jsonResponse(['success' => false, 'message' => 'Error del servidor'], 500);
+            $errorCode = $e->getCode();
+            $message = 'Error del servidor';
+            if ($errorCode === '23000' || $errorCode === 23000 || (isset($e->errorInfo[1]) && $e->errorInfo[1] === 1062)) {
+                $message = 'Este registro ya existe (duplicado)';
+            }
+            error_log('[API] PDOException: ' . $e->getMessage() . ' | Code: ' . $errorCode);
+            Http::jsonResponse(['success' => false, 'message' => $message, 'code' => $errorCode], 500);
         } catch (\Throwable $e) {
-            error_log('[API] Error no controlado: ' . $e->getMessage());
+            error_log('[API] Error no controlado: ' . $e->getMessage() . ' | Trace: ' . $e->getTraceAsString());
             Http::jsonResponse(['success' => false, 'message' => 'Error del servidor'], 500);
         }
     }

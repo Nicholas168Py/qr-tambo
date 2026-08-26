@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content="Sistema de Asistencia QR para Clases de Baile - QR Tambo" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,7 +21,6 @@
         if (!buildTimestamp) return;
         var lastBuild = localStorage.getItem('qr_tambo_build');
         if (lastBuild && lastBuild !== buildTimestamp) {
-          // New deployment detected - clear caches and force reload
           if ('caches' in window) {
             caches.keys().then(function (names) {
               names.forEach(function (name) { caches.delete(name); });
@@ -30,6 +32,20 @@
           return;
         }
         localStorage.setItem('qr_tambo_build', buildTimestamp);
+      })();
+    </script>
+    <script>
+      (function () {
+        if ('caches' in window) {
+          caches.keys().then(function (names) {
+            names.forEach(function (name) { caches.delete(name); });
+          });
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function (regs) {
+            regs.forEach(function (reg) { reg.unregister(); });
+          });
+        }
       })();
     </script>
   </head>

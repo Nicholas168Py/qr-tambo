@@ -45,6 +45,29 @@ final class Auth {
         $_SESSION['rol'] = $user['rol'];
     }
 
+    /**
+     * Extiende la vida de la cookie de sesión a 30 días.
+     * Se usa cuando el usuario activa "Recordarme".
+     */
+    public static function extendCookieLifetime(): void {
+        // La sesión ya tiene lifetime de 30 días por defecto.
+        // Este método es para cuando se necesita extender aún más.
+        if (session_status() !== PHP_SESSION_ACTIVE) return;
+
+        $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? 80) == 443;
+
+        setcookie(session_name(), session_id(), [
+            'expires' => time() + (365 * 24 * 60 * 60),
+            'path' => '/',
+            'domain' => '',
+            'secure' => $isHttps,
+            'httponly' => true,
+            'samesite' => 'Lax'
+        ]);
+
+        ini_set('session.cookie_lifetime', 365 * 24 * 60 * 60);
+    }
+
     public static function logout(): void {
         $_SESSION = [];
         session_unset();

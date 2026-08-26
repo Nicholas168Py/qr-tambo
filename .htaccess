@@ -1,6 +1,20 @@
 RewriteEngine On
 RewriteBase /
 
+# Anti-cache para páginas HTML
+<FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+</FilesMatch>
+
+# Anti-cache para la SPA
+<IfModule mod_headers.c>
+    Header set Cache-Control "no-cache, no-store, must-revalidate" "expr=%{CONTENT_TYPE} =~ m#text/html#"
+    Header set Pragma "no-cache" "expr=%{CONTENT_TYPE} =~ m#text/html#"
+    Header set Expires 0 "expr=%{CONTENT_TYPE} =~ m#text/html#"
+</IfModule>
+
 # Archivos y directorios reales
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d

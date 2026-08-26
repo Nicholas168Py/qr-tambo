@@ -5,7 +5,7 @@ import { api } from '../../api/client';
 import { EmptyState } from '../../components/ui';
 import { formatDate, formatTime, getTodayStr } from '../../lib/format';
 
-export default function BailarinDashboard() {
+export default function BailarinAsistencias() {
   const [fecha, setFecha] = useState('');
   const [applied, setApplied] = useState({});
   const [page, setPage] = useState(1);
@@ -54,7 +54,7 @@ export default function BailarinDashboard() {
 
   return (
     <>
-      <h2 style={{ marginBottom: 20 }}><ClipboardList size={20} /> Mi Historial de Asistencia</h2>
+      <h2 style={{ marginBottom: 20 }}><ClipboardList size={20} /> Mis Asistencias</h2>
 
       <form className="glass-card filter-bar" onSubmit={handleSearch} style={{ marginBottom: 20 }}>
         <div className="form-group">
