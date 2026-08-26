@@ -35,9 +35,7 @@ final class AuthController extends ApiController {
             $user = $this->service->login($cedula, $password);
             Auth::login($user);
 
-            if ($remember) {
-                Auth::extendCookieLifetime();
-            }
+            Auth::extendCookieLifetime();
 
             return [
                 'nombre' => $user['nombre'],

@@ -32,7 +32,9 @@ final class AsistenciaController extends ApiController {
             'per_page' => isset($_GET['per_page']) ? min(100, max(1, (int) $_GET['per_page'])) : 10
         ];
 
-        $this->handle(fn () => $this->service->listFor($user, $filters), 200, 'Asistencia obtenida');
+        $this->handleRaw(function () use ($user, $filters) {
+            return ['success' => true, 'message' => 'Asistencia obtenida'] + $this->service->listFor($user, $filters);
+        }, 200);
     }
 
     public function show(int $id): void {
