@@ -138,7 +138,7 @@ export default function Escanear() {
   useEffect(() => {
     if (status === 'success') {
       const timer = setTimeout(() => {
-        navigate('/bailarin');
+        navigate('/bailarin/escanear', { replace: true });
       }, 2500);
       return () => clearTimeout(timer);
     }

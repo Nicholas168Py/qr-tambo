@@ -23,16 +23,21 @@ final class AuthController extends ApiController {
         $data = Http::getRequestBody();
         $cedula = trim($data['cedula'] ?? '');
         $password = $data['password'] ?? '';
+        $remember = !empty($data['remember']);
 
         if ($cedula === '' || $password === '') {
             throw new ApiException('Cédula y contraseña son requeridos', 400);
         }
 
-        error_log('[AUTH] Login attempt for cedula=' . $cedula);
+        error_log('[AUTH] Login attempt for cedula=' . $cedula . ' remember=' . ($remember ? '1' : '0'));
 
-        $this->handle(function () use ($cedula, $password) {
+        $this->handle(function () use ($cedula, $password, $remember) {
             $user = $this->service->login($cedula, $password);
             Auth::login($user);
+
+            if ($remember) {
+                Auth::extendCookieLifetime();
+            }
 
             return [
                 'nombre' => $user['nombre'],

@@ -81,7 +81,7 @@ export function TopBar({ showMenu, onMenu }) {
       <div
         className="top-bar-avatar"
         title={user?.nombre}
-        onClick={() => navigate(isAdmin ? '/admin' : '/bailarin')}
+        onClick={() => navigate(isAdmin ? '/admin' : '/bailarin/escanear')}
       >
         {initial}
       </div>

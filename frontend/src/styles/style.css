@@ -1446,7 +1446,7 @@ tbody tr:last-child td {
 }
 
 .bailarin-main {
-    padding: 24px;
+    padding: var(--top-bar-height) 24px 24px;
     max-width: 500px;
     margin: 0 auto;
     width: 100%;

@@ -213,6 +213,7 @@ function useLoginScene() {
 
 export default function Login() {
   const login = useAuth((s) => s.login);
+  const getRememberedCedula = useAuth((s) => s.getRememberedCedula);
   const toast = useToast();
   const navigate = useNavigate();
   const { canvasRef, wavesRef, glowRef, blobsRef } = useLoginScene();
@@ -239,9 +240,9 @@ export default function Login() {
     };
   }, []);
 
-  const [cedula, setCedula] = useState('');
+  const [cedula, setCedula] = useState(() => getRememberedCedula());
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(true);
+  const [remember, setRemember] = useState(() => !!getRememberedCedula());
   const [showPwd, setShowPwd] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -252,7 +253,7 @@ export default function Login() {
       return;
     }
     setSubmitting(true);
-    const result = await login(cedula.trim(), password);
+    const result = await login(cedula.trim(), password, remember);
     console.log('[LOGIN] Result:', result);
     setSubmitting(false);
     if (result.success) {

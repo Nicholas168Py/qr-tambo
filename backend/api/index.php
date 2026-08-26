@@ -8,6 +8,11 @@ require __DIR__ . '/../config/init.php';
 
 use Support\Router;
 
+// Anti-cache headers para API responses
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 // CORS headers for mobile browser compatibility
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
